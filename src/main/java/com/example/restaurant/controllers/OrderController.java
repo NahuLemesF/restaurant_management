@@ -2,9 +2,8 @@ package com.example.restaurant.controllers;
 
 import com.example.restaurant.dto.order.OrderRequestDTO;
 import com.example.restaurant.dto.order.OrderResponseDTO;
-import com.example.restaurant.models.Order;
 import com.example.restaurant.services.order.OrderService;
-import com.example.restaurant.utils.converter.OrderDtoConverter;
+import com.example.restaurant.utils.mapper.OrderMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,18 +30,18 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrderResponseDTO createOrder(@RequestBody @Valid OrderRequestDTO dto) {
-        return OrderDtoConverter.toDto(orderService.create(dto));
+        return OrderMapper.toDto(orderService.create(dto));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable Long id) {
-        return ResponseEntity.ok(OrderDtoConverter.toDto(orderService.getById(id)));
+        return ResponseEntity.ok(OrderMapper.toDto(orderService.getById(id)));
     }
 
     @GetMapping
     public ResponseEntity<List<OrderResponseDTO>> getAllOrders() {
         return ResponseEntity.ok(
-                orderService.getAll().stream().map(OrderDtoConverter::toDto).toList()
+                orderService.getAll().stream().map(OrderMapper::toDto).toList()
         );
     }
 
@@ -54,6 +53,6 @@ public class OrderController {
 
     @PutMapping("/{id}")
     public ResponseEntity<OrderResponseDTO> updateOrder(@PathVariable Long id, @RequestBody @Valid OrderRequestDTO dto) {
-        return ResponseEntity.ok(OrderDtoConverter.toDto(orderService.update(id, dto)));
+        return ResponseEntity.ok(OrderMapper.toDto(orderService.update(id, dto)));
     }
 }

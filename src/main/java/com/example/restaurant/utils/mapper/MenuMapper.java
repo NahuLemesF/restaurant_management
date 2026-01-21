@@ -1,6 +1,5 @@
-package com.example.restaurant.utils.converter;
+package com.example.restaurant.utils.mapper;
 
-import com.example.restaurant.dto.dish.DishResponseDTO;
 import com.example.restaurant.dto.menu.MenuRequestDTO;
 import com.example.restaurant.dto.menu.MenuResponseDTO;
 import com.example.restaurant.models.Menu;
@@ -10,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MenuDtoConverter {
+public class MenuMapper {
 
     public static MenuResponseDTO convertToDto(Menu menu) {
         MenuResponseDTO dto = new MenuResponseDTO();
@@ -18,7 +17,7 @@ public class MenuDtoConverter {
         dto.setName(menu.getName());
         dto.setDescription(menu.getDescription());
         dto.setDishes(menu.getDishes().stream()
-                .map(DishDtoConverter::convertToDto)
+                .map(DishMapper::convertToDto)
                 .collect(Collectors.toList()));
         return dto;
     }

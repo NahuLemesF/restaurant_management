@@ -7,7 +7,6 @@ import com.example.restaurant.models.Dish;
 import com.example.restaurant.models.Order;
 import com.example.restaurant.observers.OrderSubject;
 import com.example.restaurant.repositories.IOrderRepository;
-import com.example.restaurant.services.client.GetClientByIdService;
 import com.example.restaurant.services.dish.GetDishByIdService;
 import com.example.restaurant.handlers.OrderProcessingChain;
 import org.junit.jupiter.api.BeforeEach;

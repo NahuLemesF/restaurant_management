@@ -8,9 +8,8 @@ import com.example.restaurant.models.Menu;
 import com.example.restaurant.models.Order;
 import com.example.restaurant.models.Client;
 import com.example.restaurant.models.Dish;
-import com.example.restaurant.services.client.GetClientByIdService;
 import com.example.restaurant.services.dish.GetDishByIdService;
-import com.example.restaurant.utils.converter.OrderDtoConverter;
+import com.example.restaurant.utils.mapper.OrderMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -193,7 +192,7 @@ class OrderControllerTest {
             order.setDishes(new ArrayList<>());
             order.setTotalPrice(null);
 
-            OrderResponseDTO orderResponseDTO = OrderDtoConverter.toDto(order);
+            OrderResponseDTO orderResponseDTO = OrderMapper.toDto(order);
 
             assertEquals(0.0f, orderResponseDTO.getTotalPrice(), "Total price should be 0.0 when order.getTotalPrice() is null");
         }

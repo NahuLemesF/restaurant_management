@@ -2,11 +2,6 @@ package com.example.restaurant.controllers;
 
 import com.example.restaurant.constants.ClientType;
 import com.example.restaurant.models.Client;
-import com.example.restaurant.services.client.AddClientService;
-import com.example.restaurant.services.client.DeleteClientService;
-import com.example.restaurant.services.client.GetAllClientsService;
-import com.example.restaurant.services.client.GetClientByIdService;
-import com.example.restaurant.services.client.UpdateClientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

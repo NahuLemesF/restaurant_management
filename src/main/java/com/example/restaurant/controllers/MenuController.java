@@ -10,7 +10,7 @@ import com.example.restaurant.services.menu.DeleteMenuService;
 import com.example.restaurant.services.menu.GetAllMenusService;
 import com.example.restaurant.services.menu.GetMenuByIdService;
 import com.example.restaurant.services.menu.UpdateMenuService;
-import com.example.restaurant.utils.converter.MenuDtoConverter;
+import com.example.restaurant.utils.mapper.MenuMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
@@ -53,14 +53,14 @@ public class MenuController {
     public ResponseEntity<MenuResponseDTO> addMenu(@RequestBody @Valid MenuRequestDTO menuRequestDTO) {
         Menu menu = createOrUpdateMenu(menuRequestDTO);
         addMenuService.execute(menu);
-        MenuResponseDTO responseDTO = MenuDtoConverter.convertToDto(menu);
+        MenuResponseDTO responseDTO = MenuMapper.convertToDto(menu);
         return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping("/{menuId}")
     public ResponseEntity<MenuResponseDTO> getMenuById(@PathVariable Long menuId) {
         Menu menu = getMenuByIdService.execute(menuId);
-        MenuResponseDTO responseDTO = MenuDtoConverter.convertToDto(menu);
+        MenuResponseDTO responseDTO = MenuMapper.convertToDto(menu);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -68,7 +68,7 @@ public class MenuController {
     public ResponseEntity<List<MenuResponseDTO>> getAllMenus() {
         List<Menu> menus = getAllMenusService.execute();
         List<MenuResponseDTO> responseDTOs = menus.stream()
-                .map(MenuDtoConverter::convertToDto)
+                .map(MenuMapper::convertToDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responseDTOs);
     }
@@ -77,7 +77,7 @@ public class MenuController {
     public ResponseEntity<MenuResponseDTO> updateMenu(@PathVariable Long menuId, @RequestBody @Valid MenuRequestDTO menuRequestDTO) {
         Menu menu = createOrUpdateMenu(menuRequestDTO);
         Menu updatedMenu = updateMenuService.execute(menuId, menu);
-        MenuResponseDTO responseDTO = MenuDtoConverter.convertToDto(updatedMenu);
+        MenuResponseDTO responseDTO = MenuMapper.convertToDto(updatedMenu);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -93,7 +93,7 @@ public class MenuController {
                 .stream()
                 .map(getDishByIdService::execute)
                 .collect(Collectors.toList());
-        return MenuDtoConverter.convertToEntity(menuRequestDTO, dishes);
+        return MenuMapper.convertToEntity(menuRequestDTO, dishes);
     }
 
 }

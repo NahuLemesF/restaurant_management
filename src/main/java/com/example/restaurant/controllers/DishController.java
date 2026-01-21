@@ -10,7 +10,7 @@ import com.example.restaurant.services.dish.GetAllDishesService;
 import com.example.restaurant.services.dish.GetDishByIdService;
 import com.example.restaurant.services.dish.UpdateDishService;
 import com.example.restaurant.services.menu.GetMenuByIdService;
-import com.example.restaurant.utils.converter.DishDtoConverter;
+import com.example.restaurant.utils.mapper.DishMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
@@ -52,16 +52,16 @@ public class DishController {
     @PostMapping
     public DishResponseDTO addDish(@RequestBody @Valid DishRequestDTO dishRequestDTO) {
         Menu menu = getMenuByIdService.execute(dishRequestDTO.getMenuId());
-        Dish dish = DishDtoConverter.convertToEntity(dishRequestDTO, menu);
+        Dish dish = DishMapper.convertToEntity(dishRequestDTO, menu);
 
-        return DishDtoConverter.convertToDto(addDishService.execute(dish));
+        return DishMapper.convertToDto(addDishService.execute(dish));
 
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DishResponseDTO> getDishById(@PathVariable Long id) {
         Dish dish = getDishByIdService.execute(id);
-        DishResponseDTO responseDTO = DishDtoConverter.convertToDto(dish);
+        DishResponseDTO responseDTO = DishMapper.convertToDto(dish);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -69,7 +69,7 @@ public class DishController {
     public ResponseEntity<List<DishResponseDTO>> getAllDishes() {
         List<Dish> dishes = getAllDishesService.execute();
         List<DishResponseDTO> responseDTOs = dishes.stream()
-                .map(DishDtoConverter::convertToDto)
+                .map(DishMapper::convertToDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responseDTOs);
     }
@@ -77,9 +77,9 @@ public class DishController {
     @PutMapping("/{id}")
     public ResponseEntity<DishResponseDTO> updateDish(@PathVariable Long id, @RequestBody @Valid DishRequestDTO dishRequestDTO) {
         Menu menu = getMenuByIdService.execute(dishRequestDTO.getMenuId());
-        Dish dishEntity = DishDtoConverter.convertToEntity(dishRequestDTO, menu);
+        Dish dishEntity = DishMapper.convertToEntity(dishRequestDTO, menu);
         Dish updatedDish = updateDishService.execute(id, dishEntity);
-        DishResponseDTO responseDTO = DishDtoConverter.convertToDto(updatedDish);
+        DishResponseDTO responseDTO = DishMapper.convertToDto(updatedDish);
         return ResponseEntity.ok(responseDTO);
     }
 

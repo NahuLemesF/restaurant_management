@@ -1,4 +1,4 @@
-package com.example.restaurant.utils.converter;
+package com.example.restaurant.utils.mapper;
 
 import com.example.restaurant.dto.dish.DishRequestDTO;
 import com.example.restaurant.dto.dish.DishResponseDTO;
@@ -7,7 +7,7 @@ import com.example.restaurant.models.Menu;
 import com.example.restaurant.utils.RoundToTwoDecimals;
 
 
-public class DishDtoConverter {
+public class DishMapper {
 
 
 

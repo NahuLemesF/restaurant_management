@@ -9,7 +9,7 @@ import com.example.restaurant.services.menu.DeleteMenuService;
 import com.example.restaurant.services.menu.GetAllMenusService;
 import com.example.restaurant.services.menu.GetMenuByIdService;
 import com.example.restaurant.services.menu.UpdateMenuService;
-import com.example.restaurant.utils.converter.MenuDtoConverter;
+import com.example.restaurant.utils.mapper.MenuMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -173,7 +173,7 @@ class MenuControllerTest {
         requestDTO.setDescription("Test Description");
 
 
-        Menu result = MenuDtoConverter.convertToEntity(requestDTO, null);
+        Menu result = MenuMapper.convertToEntity(requestDTO, null);
         
         assertEquals("Test Menu", result.getName());
         assertEquals("Test Description", result.getDescription());

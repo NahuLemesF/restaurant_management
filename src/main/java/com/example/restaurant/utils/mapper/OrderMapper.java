@@ -1,4 +1,4 @@
-package com.example.restaurant.utils.converter;
+package com.example.restaurant.utils.mapper;
 
 import com.example.restaurant.dto.order.OrderResponseDTO;
 import com.example.restaurant.models.Order;
@@ -9,14 +9,14 @@ import com.example.restaurant.utils.RoundToTwoDecimals;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class OrderDtoConverter {
+public class OrderMapper {
 
     public static OrderResponseDTO toDto(Order order) {
         OrderResponseDTO dto = new OrderResponseDTO();
         dto.setId(order.getId());
-        dto.setClient(ClientDtoConverter.convertToDto(order.getClient()));
+        dto.setClient(ClientMapper.toDto(order.getClient()));
         dto.setDishes(order.getDishes().stream()
-                .map(DishDtoConverter::convertToDto)
+                .map(DishMapper::convertToDto)
                 .collect(Collectors.toList()));
         dto.setTotalPrice(getTotalPrice(order));
         dto.setOrderDate(order.getOrderDate());
