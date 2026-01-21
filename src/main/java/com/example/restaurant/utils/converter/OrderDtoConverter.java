@@ -1,7 +1,5 @@
 package com.example.restaurant.utils.converter;
 
-import com.example.restaurant.dto.client.ClientResponseDTO;
-import com.example.restaurant.dto.dish.DishResponseDTO;
 import com.example.restaurant.dto.order.OrderResponseDTO;
 import com.example.restaurant.models.Order;
 import com.example.restaurant.models.Client;
@@ -13,7 +11,7 @@ import java.util.stream.Collectors;
 
 public class OrderDtoConverter {
 
-    public static OrderResponseDTO convertToDto(Order order) {
+    public static OrderResponseDTO toDto(Order order) {
         OrderResponseDTO dto = new OrderResponseDTO();
         dto.setId(order.getId());
         dto.setClient(ClientDtoConverter.convertToDto(order.getClient()));
@@ -29,7 +27,7 @@ public class OrderDtoConverter {
         return order.getTotalPrice() != null ? RoundToTwoDecimals.roundToTwoDecimals(order.getTotalPrice()) : 0.0f;
     }
 
-    public static Order convertToEntity(Client client, List<Dish> dishes) {
+    public static Order toEntity(Client client, List<Dish> dishes) {
         Order order = new Order();
         order.setClient(client);
         order.setDishes(dishes);

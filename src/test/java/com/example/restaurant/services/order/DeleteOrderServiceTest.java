@@ -4,7 +4,6 @@ import com.example.restaurant.constants.EventType;
 import com.example.restaurant.models.Order;
 import com.example.restaurant.observers.OrderSubject;
 import com.example.restaurant.repositories.IOrderRepository;
-import com.example.restaurant.services.order.DeleteOrderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
