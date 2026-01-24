@@ -6,11 +6,13 @@ import com.example.restaurant.dto.dish.DishResponseDTO;
 import com.example.restaurant.models.Dish;
 import com.example.restaurant.models.Menu;
 import com.example.restaurant.services.dish.DishService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
@@ -21,11 +23,15 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.*;
 
 class DishControllerTest {
 
-    private WebTestClient webTestClient;
+    private MockMvc mockMvc;
     private DishService dishService;
+    private ObjectMapper objectMapper;
 
     private Dish dish;
     private Menu menu;
@@ -33,8 +39,9 @@ class DishControllerTest {
     @BeforeEach
     void setUp() {
         dishService = mock(DishService.class);
+        objectMapper = new ObjectMapper();
 
-        webTestClient = WebTestClient.bindToController(new DishController(dishService)).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(new DishController(dishService)).build();
 
         menu = new Menu(1L, "Lunch Menu", "Delicious menu options");
         dish = new Dish(1L, "Pasta", "Delicious pasta", 12.99F, DishType.COMMON, menu);
@@ -42,55 +49,45 @@ class DishControllerTest {
 
     @Test
     @DisplayName("Add Dish")
-    void addDish() {
+    void addDish() throws Exception {
         when(dishService.create(any(DishRequestDTO.class))).thenReturn(dish);
 
         DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", 12.99F, 1L);
 
-        webTestClient.post()
-                .uri("/dishes")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(dishRequestDTO)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(DishResponseDTO.class)
-                .value(response -> {
-                    assertEquals(dish.getId(), response.getId());
-                    assertEquals(dish.getName(), response.getName());
-                    assertEquals(dish.getDescription(), response.getDescription());
-                    assertEquals(dish.getPrice(), response.getPrice());
-                    assertEquals(dish.getMenu().getName(), response.getMenuName());
-                });
+        mockMvc.perform(post("/dishes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dishRequestDTO)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(dish.getId()))
+                .andExpect(jsonPath("$.name").value(dish.getName()))
+                .andExpect(jsonPath("$.description").value(dish.getDescription()))
+                .andExpect(jsonPath("$.price").value(dish.getPrice()))
+                .andExpect(jsonPath("$.menuName").value(dish.getMenu().getName()));
 
         verify(dishService).create(any(DishRequestDTO.class));
     }
 
     @Test
     @DisplayName("Get Dish by ID")
-    void getDishById() {
+    void getDishById() throws Exception {
         when(dishService.getById(anyLong())).thenReturn(dish);
 
-        webTestClient.get()
-                .uri("/dishes/{id}", 1L)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(DishResponseDTO.class)
-                .value(response -> {
-                    assertEquals(dish.getId(), response.getId());
-                    assertEquals(dish.getName(), response.getName());
-                    assertEquals(dish.getDescription(), response.getDescription());
-                    assertEquals(dish.getPrice(), response.getPrice());
-                    assertEquals(dish.getMenu().getName(), response.getMenuName());
-                });
+        mockMvc.perform(get("/dishes/{id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(dish.getId()))
+                .andExpect(jsonPath("$.name").value(dish.getName()))
+                .andExpect(jsonPath("$.description").value(dish.getDescription()))
+                .andExpect(jsonPath("$.price").value(dish.getPrice()))
+                .andExpect(jsonPath("$.menuName").value(dish.getMenu().getName()));
 
         verify(dishService).getById(anyLong());
     }
 
     @Test
     @DisplayName("Get All Dishes")
-    void getAllDishes() {
+    void getAllDishes() throws Exception {
         List<Dish> dishes = List.of(
                 dish,
                 new Dish(2L, "Pizza", "Delicious pizza", 15.99F, DishType.COMMON, menu)
@@ -98,56 +95,44 @@ class DishControllerTest {
 
         when(dishService.getAll()).thenReturn(dishes);
 
-        webTestClient.get()
-                .uri("/dishes")
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBodyList(DishResponseDTO.class)
-                .hasSize(2)
-                .value(response -> {
-                    assertEquals("Pasta", response.get(0).getName());
-                    assertEquals("Pizza", response.get(1).getName());
-                });
+        mockMvc.perform(get("/dishes"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].name").value("Pasta"))
+                .andExpect(jsonPath("$[1].name").value("Pizza"));
 
         verify(dishService).getAll();
     }
 
     @Test
     @DisplayName("Update Dish")
-    void updateDish() {
+    void updateDish() throws Exception {
         when(dishService.update(anyLong(), any(DishRequestDTO.class))).thenReturn(dish);
 
         DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", 12.99F, 1L);
 
-        webTestClient.put()
-                .uri("/dishes/{id}", 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(dishRequestDTO)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(DishResponseDTO.class)
-                .value(response -> {
-                    assertEquals(dish.getId(), response.getId());
-                    assertEquals(dish.getName(), response.getName());
-                    assertEquals(dish.getDescription(), response.getDescription());
-                    assertEquals(dish.getPrice(), response.getPrice());
-                    assertEquals(dish.getMenu().getName(), response.getMenuName());
-                });
+        mockMvc.perform(put("/dishes/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dishRequestDTO)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").value(dish.getId()))
+                .andExpect(jsonPath("$.name").value(dish.getName()))
+                .andExpect(jsonPath("$.description").value(dish.getDescription()))
+                .andExpect(jsonPath("$.price").value(dish.getPrice()))
+                .andExpect(jsonPath("$.menuName").value(dish.getMenu().getName()));
 
         verify(dishService).update(anyLong(), any(DishRequestDTO.class));
     }
 
     @Test
     @DisplayName("Delete Dish")
-    void deleteDish() {
+    void deleteDish() throws Exception {
         doNothing().when(dishService).delete(anyLong());
 
-        webTestClient.delete()
-                .uri("/dishes/{id}", 1L)
-                .exchange()
-                .expectStatus().isNoContent();
+        mockMvc.perform(delete("/dishes/{id}", 1L))
+                .andExpect(status().isNoContent());
 
         verify(dishService).delete(anyLong());
     }
