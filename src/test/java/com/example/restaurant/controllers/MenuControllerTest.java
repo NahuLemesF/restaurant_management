@@ -3,12 +3,7 @@ package com.example.restaurant.controllers;
 import com.example.restaurant.dto.menu.MenuRequestDTO;
 import com.example.restaurant.dto.menu.MenuResponseDTO;
 import com.example.restaurant.models.Menu;
-import com.example.restaurant.services.dish.GetDishByIdService;
-import com.example.restaurant.services.menu.AddMenuService;
-import com.example.restaurant.services.menu.DeleteMenuService;
-import com.example.restaurant.services.menu.GetAllMenusService;
-import com.example.restaurant.services.menu.GetMenuByIdService;
-import com.example.restaurant.services.menu.UpdateMenuService;
+import com.example.restaurant.services.menu.MenuService;
 import com.example.restaurant.utils.mapper.MenuMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,32 +26,15 @@ import static org.mockito.Mockito.doNothing;
 class MenuControllerTest {
 
     private WebTestClient webTestClient;
-    private AddMenuService addMenuService;
-    private GetMenuByIdService getMenuByIdService;
-    private GetAllMenusService getAllMenusService;
-    private UpdateMenuService updateMenuService;
-    private DeleteMenuService deleteMenuService;
-    private GetDishByIdService getDishByIdService;
+    private MenuService menuService;
 
     private Menu menu;
 
     @BeforeEach
     void setUp() {
-        addMenuService = mock(AddMenuService.class);
-        getMenuByIdService = mock(GetMenuByIdService.class);
-        getAllMenusService = mock(GetAllMenusService.class);
-        updateMenuService = mock(UpdateMenuService.class);
-        deleteMenuService = mock(DeleteMenuService.class);
-        getDishByIdService = mock(GetDishByIdService.class);
+        menuService = mock(MenuService.class);
 
-        webTestClient = WebTestClient.bindToController(new MenuController(
-                addMenuService,
-                getMenuByIdService,
-                getAllMenusService,
-                updateMenuService,
-                deleteMenuService,
-                getDishByIdService
-        )).build();
+        webTestClient = WebTestClient.bindToController(new MenuController(menuService)).build();
 
         menu = new Menu(1L, "Lunch Menu", "Delicious menu options", new ArrayList<>());
     }
@@ -64,7 +42,7 @@ class MenuControllerTest {
     @Test
     @DisplayName("Add Menu")
     void addMenu() {
-        doNothing().when(addMenuService).execute(any(Menu.class));
+        when(menuService.create(any(MenuRequestDTO.class))).thenReturn(menu);
 
         MenuRequestDTO menuRequestDTO = new MenuRequestDTO();
         menuRequestDTO.setName("Lunch Menu");
@@ -77,14 +55,14 @@ class MenuControllerTest {
                 .exchange()
                 .expectStatus().isOk();
 
-        verify(addMenuService).execute(any(Menu.class));
+        verify(menuService).create(any(MenuRequestDTO.class));
     }
 
 
     @Test
     @DisplayName("Get Menu by ID")
     void getMenuById() {
-        when(getMenuByIdService.execute(anyLong())).thenReturn(menu);
+        when(menuService.getById(anyLong())).thenReturn(menu);
 
         webTestClient.get()
                 .uri("/menus/{id}", 1L)
@@ -98,7 +76,7 @@ class MenuControllerTest {
                     assertEquals(menu.getDescription(), response.getDescription());
                 });
 
-        verify(getMenuByIdService).execute(anyLong());
+        verify(menuService).getById(anyLong());
     }
 
     @Test
@@ -109,7 +87,7 @@ class MenuControllerTest {
                 new Menu(2L, "Dinner Menu", "Evening menu options", new ArrayList<>())
         );
 
-        when(getAllMenusService.execute()).thenReturn(menus);
+        when(menuService.getAll()).thenReturn(menus);
 
         webTestClient.get()
                 .uri("/menus")
@@ -123,13 +101,13 @@ class MenuControllerTest {
                     assertEquals("Dinner Menu", response.get(1).getName());
                 });
 
-        verify(getAllMenusService).execute();
+        verify(menuService).getAll();
     }
 
     @Test
     @DisplayName("Update Menu")
     void updateMenu() {
-        when(updateMenuService.execute(anyLong(), any(Menu.class))).thenReturn(menu);
+        when(menuService.update(anyLong(), any(MenuRequestDTO.class))).thenReturn(menu);
 
         MenuRequestDTO menuRequestDTO = new MenuRequestDTO();
         menuRequestDTO.setName("Lunch Menu");
@@ -149,20 +127,20 @@ class MenuControllerTest {
                     assertEquals(menu.getDescription(), response.getDescription());
                 });
 
-        verify(updateMenuService).execute(anyLong(), any(Menu.class));
+        verify(menuService).update(anyLong(), any(MenuRequestDTO.class));
     }
 
     @Test
     @DisplayName("Delete Menu")
     void deleteMenu() {
-        doNothing().when(deleteMenuService).execute(anyLong());
+        doNothing().when(menuService).delete(anyLong());
 
         webTestClient.delete()
                 .uri("/menus/{id}", 1L)
                 .exchange()
                 .expectStatus().isNoContent();
 
-        verify(deleteMenuService).execute(anyLong());
+        verify(menuService).delete(anyLong());
     }
 
     @Test

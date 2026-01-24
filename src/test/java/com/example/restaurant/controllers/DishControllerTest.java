@@ -5,12 +5,7 @@ import com.example.restaurant.dto.dish.DishRequestDTO;
 import com.example.restaurant.dto.dish.DishResponseDTO;
 import com.example.restaurant.models.Dish;
 import com.example.restaurant.models.Menu;
-import com.example.restaurant.services.dish.AddDishService;
-import com.example.restaurant.services.dish.DeleteDishService;
-import com.example.restaurant.services.dish.GetAllDishesService;
-import com.example.restaurant.services.dish.GetDishByIdService;
-import com.example.restaurant.services.dish.UpdateDishService;
-import com.example.restaurant.services.menu.GetMenuByIdService;
+import com.example.restaurant.services.dish.DishService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,33 +25,16 @@ import static org.mockito.Mockito.when;
 class DishControllerTest {
 
     private WebTestClient webTestClient;
-    private AddDishService addDishService;
-    private GetDishByIdService getDishByIdService;
-    private GetAllDishesService getAllDishesService;
-    private UpdateDishService updateDishService;
-    private DeleteDishService deleteDishService;
-    private GetMenuByIdService getMenuByIdService;
+    private DishService dishService;
 
     private Dish dish;
     private Menu menu;
 
     @BeforeEach
     void setUp() {
-        addDishService = mock(AddDishService.class);
-        getDishByIdService = mock(GetDishByIdService.class);
-        getAllDishesService = mock(GetAllDishesService.class);
-        updateDishService = mock(UpdateDishService.class);
-        deleteDishService = mock(DeleteDishService.class);
-        getMenuByIdService = mock(GetMenuByIdService.class);
+        dishService = mock(DishService.class);
 
-        webTestClient = WebTestClient.bindToController(new DishController(
-                addDishService,
-                getDishByIdService,
-                getAllDishesService,
-                updateDishService,
-                deleteDishService,
-                getMenuByIdService
-        )).build();
+        webTestClient = WebTestClient.bindToController(new DishController(dishService)).build();
 
         menu = new Menu(1L, "Lunch Menu", "Delicious menu options");
         dish = new Dish(1L, "Pasta", "Delicious pasta", 12.99F, DishType.COMMON, menu);
@@ -65,8 +43,7 @@ class DishControllerTest {
     @Test
     @DisplayName("Add Dish")
     void addDish() {
-        when(getMenuByIdService.execute(anyLong())).thenReturn(menu);
-        when(addDishService.execute(any(Dish.class))).thenReturn(dish);
+        when(dishService.create(any(DishRequestDTO.class))).thenReturn(dish);
 
         DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", 12.99F, 1L);
 
@@ -86,14 +63,13 @@ class DishControllerTest {
                     assertEquals(dish.getMenu().getName(), response.getMenuName());
                 });
 
-        verify(getMenuByIdService).execute(anyLong());
-        verify(addDishService).execute(any(Dish.class));
+        verify(dishService).create(any(DishRequestDTO.class));
     }
 
     @Test
     @DisplayName("Get Dish by ID")
     void getDishById() {
-        when(getDishByIdService.execute(anyLong())).thenReturn(dish);
+        when(dishService.getById(anyLong())).thenReturn(dish);
 
         webTestClient.get()
                 .uri("/dishes/{id}", 1L)
@@ -109,7 +85,7 @@ class DishControllerTest {
                     assertEquals(dish.getMenu().getName(), response.getMenuName());
                 });
 
-        verify(getDishByIdService).execute(anyLong());
+        verify(dishService).getById(anyLong());
     }
 
     @Test
@@ -120,7 +96,7 @@ class DishControllerTest {
                 new Dish(2L, "Pizza", "Delicious pizza", 15.99F, DishType.COMMON, menu)
         );
 
-        when(getAllDishesService.execute()).thenReturn(dishes);
+        when(dishService.getAll()).thenReturn(dishes);
 
         webTestClient.get()
                 .uri("/dishes")
@@ -134,14 +110,13 @@ class DishControllerTest {
                     assertEquals("Pizza", response.get(1).getName());
                 });
 
-        verify(getAllDishesService).execute();
+        verify(dishService).getAll();
     }
 
     @Test
     @DisplayName("Update Dish")
     void updateDish() {
-        when(getMenuByIdService.execute(anyLong())).thenReturn(menu);
-        when(updateDishService.execute(anyLong(), any(Dish.class))).thenReturn(dish);
+        when(dishService.update(anyLong(), any(DishRequestDTO.class))).thenReturn(dish);
 
         DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", 12.99F, 1L);
 
@@ -161,21 +136,20 @@ class DishControllerTest {
                     assertEquals(dish.getMenu().getName(), response.getMenuName());
                 });
 
-        verify(getMenuByIdService).execute(anyLong());
-        verify(updateDishService).execute(anyLong(), any(Dish.class));
+        verify(dishService).update(anyLong(), any(DishRequestDTO.class));
     }
 
     @Test
     @DisplayName("Delete Dish")
     void deleteDish() {
-        doNothing().when(deleteDishService).execute(anyLong());
+        doNothing().when(dishService).delete(anyLong());
 
         webTestClient.delete()
                 .uri("/dishes/{id}", 1L)
                 .exchange()
                 .expectStatus().isNoContent();
 
-        verify(deleteDishService).execute(anyLong());
+        verify(dishService).delete(anyLong());
     }
 
     @Test

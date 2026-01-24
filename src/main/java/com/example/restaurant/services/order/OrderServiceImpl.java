@@ -9,7 +9,7 @@ import com.example.restaurant.models.Order;
 import com.example.restaurant.observers.OrderSubject;
 import com.example.restaurant.repositories.IOrderRepository;
 import com.example.restaurant.services.client.ClientService;
-import com.example.restaurant.services.dish.GetDishByIdService;
+import com.example.restaurant.services.dish.DishService;
 import com.example.restaurant.utils.OrderPriceCalculator;
 import org.springframework.stereotype.Service;
 
@@ -20,23 +20,23 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
     private final IOrderRepository orderRepository;
-    private final GetDishByIdService getDishByIdService;
     private final OrderSubject orderSubject;
     private final OrderProcessingChain orderProcessingChain;
     private final ClientService clientService;
+    private final DishService dishService;
 
-    public OrderServiceImpl(IOrderRepository orderRepository, GetDishByIdService getDishByIdService, OrderSubject orderSubject, OrderProcessingChain orderProcessingChain, ClientService clientService) {
+    public OrderServiceImpl(IOrderRepository orderRepository, OrderSubject orderSubject, OrderProcessingChain orderProcessingChain, ClientService clientService, DishService dishService) {
         this.orderRepository = orderRepository;
-        this.getDishByIdService = getDishByIdService;
         this.orderSubject = orderSubject;
         this.orderProcessingChain = orderProcessingChain;
         this.clientService = clientService;
+        this.dishService = dishService;
     }
 
     @Override
     public Order create(OrderRequestDTO dto) {
         Client client = clientService.getById(dto.getClientId());
-        List<Dish> dishes = dto.getDishIds().stream().map(getDishByIdService::execute).toList();
+        List<Dish> dishes = dto.getDishIds().stream().map(dishService::getById).toList();
 
         Order order = new Order();
         order.setClient(client);
@@ -73,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
         Order existing = getById(id);
 
         Client client = clientService.getById(dto.getClientId());
-        List<Dish> dishes = dto.getDishIds().stream().map(getDishByIdService::execute).toList();
+        List<Dish> dishes = dto.getDishIds().stream().map(dishService::getById).toList();
 
         existing.setClient(client);
         existing.setDishes(dishes);

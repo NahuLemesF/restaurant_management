@@ -3,13 +3,7 @@ package com.example.restaurant.controllers;
 import com.example.restaurant.dto.dish.DishRequestDTO;
 import com.example.restaurant.dto.dish.DishResponseDTO;
 import com.example.restaurant.models.Dish;
-import com.example.restaurant.models.Menu;
-import com.example.restaurant.services.dish.AddDishService;
-import com.example.restaurant.services.dish.DeleteDishService;
-import com.example.restaurant.services.dish.GetAllDishesService;
-import com.example.restaurant.services.dish.GetDishByIdService;
-import com.example.restaurant.services.dish.UpdateDishService;
-import com.example.restaurant.services.menu.GetMenuByIdService;
+import com.example.restaurant.services.dish.DishService;
 import com.example.restaurant.utils.mapper.DishMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,43 +25,29 @@ import java.util.stream.Collectors;
 @RequestMapping("/dishes")
 public class DishController {
 
-    private final AddDishService addDishService;
-    private final GetDishByIdService getDishByIdService;
-    private final GetAllDishesService getAllDishesService;
-    private final UpdateDishService updateDishService;
-    private final DeleteDishService deleteDishService;
-    private final GetMenuByIdService getMenuByIdService;
-
+    private final DishService dishService;
 
     @Autowired
-    public DishController(AddDishService addDishService, GetDishByIdService getDishByIdService, GetAllDishesService getAllDishesService, UpdateDishService updateDishService, DeleteDishService deleteDishService, GetMenuByIdService getMenuByIdService) {
-        this.addDishService = addDishService;
-        this.getDishByIdService = getDishByIdService;
-        this.getAllDishesService = getAllDishesService;
-        this.updateDishService = updateDishService;
-        this.deleteDishService = deleteDishService;
-        this.getMenuByIdService = getMenuByIdService;
+    public DishController(DishService dishService) {
+        this.dishService = dishService;
     }
 
     @PostMapping
     public DishResponseDTO addDish(@RequestBody @Valid DishRequestDTO dishRequestDTO) {
-        Menu menu = getMenuByIdService.execute(dishRequestDTO.getMenuId());
-        Dish dish = DishMapper.convertToEntity(dishRequestDTO, menu);
-
-        return DishMapper.convertToDto(addDishService.execute(dish));
-
+        Dish createdDish = dishService.create(dishRequestDTO);
+        return DishMapper.convertToDto(createdDish);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DishResponseDTO> getDishById(@PathVariable Long id) {
-        Dish dish = getDishByIdService.execute(id);
+        Dish dish = dishService.getById(id);
         DishResponseDTO responseDTO = DishMapper.convertToDto(dish);
         return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping
     public ResponseEntity<List<DishResponseDTO>> getAllDishes() {
-        List<Dish> dishes = getAllDishesService.execute();
+        List<Dish> dishes = dishService.getAll();
         List<DishResponseDTO> responseDTOs = dishes.stream()
                 .map(DishMapper::convertToDto)
                 .collect(Collectors.toList());
@@ -76,9 +56,7 @@ public class DishController {
 
     @PutMapping("/{id}")
     public ResponseEntity<DishResponseDTO> updateDish(@PathVariable Long id, @RequestBody @Valid DishRequestDTO dishRequestDTO) {
-        Menu menu = getMenuByIdService.execute(dishRequestDTO.getMenuId());
-        Dish dishEntity = DishMapper.convertToEntity(dishRequestDTO, menu);
-        Dish updatedDish = updateDishService.execute(id, dishEntity);
+        Dish updatedDish = dishService.update(id, dishRequestDTO);
         DishResponseDTO responseDTO = DishMapper.convertToDto(updatedDish);
         return ResponseEntity.ok(responseDTO);
     }
@@ -86,7 +64,7 @@ public class DishController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDish(@PathVariable Long id) {
-        deleteDishService.execute(id);
+        dishService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

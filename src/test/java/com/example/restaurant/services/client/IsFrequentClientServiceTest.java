@@ -11,6 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -25,24 +27,26 @@ class IsFrequentClientServiceTest {
     private IOrderRepository orderRepository;
     private IClientRepository clientRepository;
     private ClientSubject clientSubject;
-    private IsFrequentClientService isFrequentClientService;
+    private FrequentClientService frequentClientService;
 
     @BeforeEach
     void setUp() {
         orderRepository = mock(IOrderRepository.class);
         clientRepository = mock(IClientRepository.class);
         clientSubject = mock(ClientSubject.class);
-        isFrequentClientService = new IsFrequentClientService(orderRepository, clientRepository, clientSubject);
+        frequentClientService = new FrequentClientService(orderRepository, clientRepository, clientSubject);
     }
 
     @Test
-    @DisplayName("Test IsFrequentClientService execute method - Client Becomes Frequent")
+    @DisplayName("Test FrequentClientService updateClientTypeIfFrequent - Client Becomes Frequent")
     void testExecuteClientBecomesFrequent() {
         Client client = new Client(1L, "John", "Doe", "john.doe@example.com", ClientType.COMMON);
 
         when(orderRepository.countByClientId(client.getId())).thenReturn(10L);
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
+        when(clientRepository.save(client)).thenReturn(client);
 
-        isFrequentClientService.execute(client);
+        frequentClientService.updateClientTypeIfFrequent(client.getId());
 
         assertEquals(ClientType.FREQUENT, client.getClientType());
         verify(clientRepository).save(client);
@@ -53,16 +57,17 @@ class IsFrequentClientServiceTest {
     }
 
     @Test
-    @DisplayName("Test IsFrequentClientService execute method - Client Does Not Become Frequent")
+    @DisplayName("Test FrequentClientService updateClientTypeIfFrequent - Client Does Not Become Frequent")
     void testExecuteClientDoesNotBecomeFrequent() {
         Client client = new Client(1L, "John", "Doe", "john.doe@example.com", ClientType.COMMON);
 
         when(orderRepository.countByClientId(client.getId())).thenReturn(5L);
 
-        isFrequentClientService.execute(client);
+        frequentClientService.updateClientTypeIfFrequent(client.getId());
 
         assertEquals(ClientType.COMMON, client.getClientType());
         verify(clientRepository, never()).save(client);
         verify(clientSubject, never()).notifyObservers(any(), any());
     }
 }
+

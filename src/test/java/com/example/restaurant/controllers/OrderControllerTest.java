@@ -8,7 +8,7 @@ import com.example.restaurant.models.Menu;
 import com.example.restaurant.models.Order;
 import com.example.restaurant.models.Client;
 import com.example.restaurant.models.Dish;
-import com.example.restaurant.services.dish.GetDishByIdService;
+import com.example.restaurant.services.order.OrderService;
 import com.example.restaurant.utils.mapper.OrderMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,13 +30,7 @@ import static org.mockito.Mockito.doNothing;
 class OrderControllerTest {
 
     private WebTestClient webTestClient;
-    private GetClientByIdService getClientByIdService;
-    private GetDishByIdService getDishByIdService;
-    private CreateOrderService createOrderService;
-    private GetOrderByIdService getOrderByIdService;
-    private GetAllOrdersService getAllOrdersService;
-    private UpdateOrderService updateOrderService;
-    private DeleteOrderService deleteOrderService;
+    private OrderService orderService;
 
     private Order order;
     private Client client;
@@ -44,22 +38,10 @@ class OrderControllerTest {
 
     @BeforeEach
     void setUp() {
-        getClientByIdService = mock(GetClientByIdService.class);
-        getDishByIdService = mock(GetDishByIdService.class);
-        createOrderService = mock(CreateOrderService.class);
-        getOrderByIdService = mock(GetOrderByIdService.class);
-        getAllOrdersService = mock(GetAllOrdersService.class);
-        updateOrderService = mock(UpdateOrderService.class);
-        deleteOrderService = mock(DeleteOrderService.class);
+        orderService = mock(OrderService.class);
 
         webTestClient = WebTestClient.bindToController(new OrderController(
-                getClientByIdService,
-                getDishByIdService,
-                createOrderService,
-                getOrderByIdService,
-                getAllOrdersService,
-                updateOrderService,
-                deleteOrderService
+                orderService
         )).build();
 
         Menu menu = new Menu(1L, "Lunch Menu", "Delicious options", new ArrayList<>());
@@ -73,9 +55,7 @@ class OrderControllerTest {
     @Test
     @DisplayName("Create Order")
     void createOrder() {
-        when(getClientByIdService.execute(anyLong())).thenReturn(client);
-        when(getDishByIdService.execute(anyLong())).thenReturn(dish);
-        when(createOrderService.execute(anyLong(), any())).thenReturn(order);
+        when(orderService.create(any(OrderRequestDTO.class))).thenReturn(order);
 
         OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
         orderRequestDTO.setClientId(1L);
@@ -96,13 +76,13 @@ class OrderControllerTest {
                     assertEquals(order.getTotalPrice(), response.getTotalPrice());
                 });
 
-        verify(createOrderService).execute(anyLong(), any());
+        verify(orderService).create(any(OrderRequestDTO.class));
     }
 
     @Test
     @DisplayName("Get Order by ID")
     void getOrderById() {
-        when(getOrderByIdService.execute(anyLong())).thenReturn(order);
+        when(orderService.getById(anyLong())).thenReturn(order);
 
         webTestClient.get()
                 .uri("/orders/{id}", 1L)
@@ -117,7 +97,7 @@ class OrderControllerTest {
                     assertEquals(order.getTotalPrice(), response.getTotalPrice());
                 });
 
-        verify(getOrderByIdService).execute(anyLong());
+        verify(orderService).getById(anyLong());
     }
 
     @Test
@@ -125,7 +105,7 @@ class OrderControllerTest {
     void getAllOrders() {
         List<Order> orders = List.of(order, new Order(client, List.of(dish), 2L, 25.98F));
 
-        when(getAllOrdersService.execute()).thenReturn(orders);
+        when(orderService.getAll()).thenReturn(orders);
 
         webTestClient.get()
                 .uri("/orders")
@@ -139,15 +119,13 @@ class OrderControllerTest {
                     assertEquals(2L, response.get(1).getId());
                 });
 
-        verify(getAllOrdersService).execute();
+        verify(orderService).getAll();
     }
 
     @Test
     @DisplayName("Update Order")
     void updateOrder() {
-        when(getClientByIdService.execute(anyLong())).thenReturn(client);
-        when(getDishByIdService.execute(anyLong())).thenReturn(dish);
-        when(updateOrderService.execute(anyLong(), any(Order.class))).thenReturn(order);
+        when(orderService.update(anyLong(), any(OrderRequestDTO.class))).thenReturn(order);
 
         OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
         orderRequestDTO.setClientId(1L);
@@ -168,20 +146,20 @@ class OrderControllerTest {
                     assertEquals(order.getTotalPrice(), response.getTotalPrice());
                 });
 
-        verify(updateOrderService).execute(anyLong(), any(Order.class));
+        verify(orderService).update(anyLong(), any(OrderRequestDTO.class));
     }
 
     @Test
     @DisplayName("Delete Order")
     void deleteOrder() {
-        doNothing().when(deleteOrderService).execute(anyLong());
+        doNothing().when(orderService).delete(anyLong());
 
         webTestClient.delete()
                 .uri("/orders/{id}", 1L)
                 .exchange()
                 .expectStatus().isNoContent();
 
-        verify(deleteOrderService).execute(anyLong());
+        verify(orderService).delete(anyLong());
     }
 
         @Test
