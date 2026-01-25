@@ -50,9 +50,7 @@ class MenuControllerTest {
     void addMenu() throws Exception {
         when(menuService.create(any(MenuRequestDTO.class))).thenReturn(menu);
 
-        MenuRequestDTO menuRequestDTO = new MenuRequestDTO();
-        menuRequestDTO.setName("Lunch Menu");
-        menuRequestDTO.setDescription("Delicious menu options");
+        MenuRequestDTO menuRequestDTO = new MenuRequestDTO("Lunch Menu", "Delicious menu options", null);
 
         mockMvc.perform(post("/menus")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -103,9 +101,7 @@ class MenuControllerTest {
     void updateMenu() throws Exception {
         when(menuService.update(anyLong(), any(MenuRequestDTO.class))).thenReturn(menu);
 
-        MenuRequestDTO menuRequestDTO = new MenuRequestDTO();
-        menuRequestDTO.setName("Lunch Menu");
-        menuRequestDTO.setDescription("Delicious menu options");
+        MenuRequestDTO menuRequestDTO = new MenuRequestDTO("Lunch Menu", "Delicious menu options", null);
 
         mockMvc.perform(put("/menus/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -132,11 +128,7 @@ class MenuControllerTest {
 
     @Test
     void handlesNullDishes() {
-
-        MenuRequestDTO requestDTO = new MenuRequestDTO();
-        requestDTO.setName("Test Menu");
-        requestDTO.setDescription("Test Description");
-
+        MenuRequestDTO requestDTO = new MenuRequestDTO("Test Menu", "Test Description", null);
 
         Menu result = MenuMapper.convertToEntity(requestDTO, null);
 

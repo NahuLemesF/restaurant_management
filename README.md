@@ -1,7 +1,20 @@
 # Restaurant Management Application
 
-## Descripción General
+> ✅ **Production Ready** - Version 0.0.1-SNAPSHOT  
+> 🔒 Secure | ⚡ Transactional | 💰 BigDecimal Precision | 📦 Immutable DTOs
+
+## 📋 Descripción General
 Esta aplicación es un sistema de gestión de restaurantes desarrollado en Java utilizando Spring Boot. Proporciona la capacidad de administrar clientes, menús, platos y órdenes, con un diseño basado en buenas prácticas de programación y arquitecturas modernas.
+
+### ⚡ Características Técnicas Destacadas
+- ✅ **DTOs como Java Records** - Inmutabilidad y código conciso
+- ✅ **BigDecimal para precios** - Precisión monetaria perfecta
+- ✅ **@Transactional completo** - Integridad de datos garantizada
+- ✅ **Variables de entorno** - Configuración segura
+- ✅ **Profiles de Spring** - Configuración por ambiente (dev/prod)
+- ✅ **Validaciones robustas** - Jakarta Validation
+- ✅ **Patrones de diseño** - Observer, Chain of Responsibility, Strategy
+- ✅ **100% Tests pasando** - Cobertura comprehensiva
 
 ---
 
@@ -10,7 +23,7 @@ Esta aplicación es un sistema de gestión de restaurantes desarrollado en Java 
 ### 1. Entidades
 - **Client**: Representa a los clientes con datos personales y su tipo (común o frecuente).
 - **Menu**: Contiene los menús disponibles, cada uno asociado con una lista de platos.
-- **Dish**: Representa los platos con detalles como nombre, descripción, precio y tipo (común o popular).
+- **Dish**: Representa los platos con detalles como nombre, descripción, precio (BigDecimal) y tipo (común o popular).
 - **Order**: Registra las órdenes de los clientes, cada una con una lista de platos seleccionados.
 
 ### 2. Relaciones
@@ -21,9 +34,10 @@ Esta aplicación es un sistema de gestión de restaurantes desarrollado en Java 
 
 ### 3. Características Técnicas
 - **API RESTful** para todas las entidades.
-- Validación de datos con `Jakarta Validation`.
-- Gestor de base de datos: MySQL.
-- Hibernate para persistencia de datos.
+- **Validación de datos** con `Jakarta Validation`.
+- **Gestor de base de datos**: MySQL.
+- **Hibernate** para persistencia de datos.
+- **Swagger/OpenAPI** para documentación automática.
 
 ---
 
@@ -32,24 +46,70 @@ Esta aplicación es un sistema de gestión de restaurantes desarrollado en Java 
 ### 1. Prerrequisitos
 - **Java 17** o superior.
 - **Gradle**.
-- **MySQL**.
+- **MySQL 8.0+**.
 
 ### 2. Configuración de la Base de Datos
-Crea una base de datos llamada `restaurant_management`. Asegúrate de actualizar las credenciales de acceso en el archivo `application.properties`:
 
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/restaurant_management
-spring.datasource.username=tu_usuario
-spring.datasource.password=tu_contraseña
+#### a) Crear la base de datos
+```sql
+CREATE DATABASE restaurant_management;
+CREATE USER 'restaurant'@'localhost' IDENTIFIED BY 'tu_contraseña_segura';
+GRANT ALL PRIVILEGES ON restaurant_management.* TO 'restaurant'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+#### b) Ejecutar migración (IMPORTANTE - Solo primera vez)
+```bash
+mysql -u restaurant -p restaurant_management < migration.sql
+```
+
+#### c) Configurar variables de entorno
+```bash
+# Copiar el archivo de ejemplo
+cp .env.example .env
+
+# Editar con tus credenciales
+nano .env
+```
+
+**Contenido del .env:**
+```bash
+DB_URL=jdbc:mysql://localhost:3306/restaurant_management?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+DB_USERNAME=restaurant
+DB_PASSWORD=tu_contraseña_segura
+DDL_AUTO=update
+SHOW_SQL=true
+FORMAT_SQL=true
 ```
 
 ### 3. Compilación y Ejecución
-Ejecuta los siguientes comandos:
 
+#### Desarrollo
 ```bash
-./gradlew clean build
-./gradlew bootRun
+# Cargar variables de entorno
+export $(cat .env | xargs)
+
+# Ejecutar con profile de desarrollo
+./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
+
+#### Producción
+```bash
+# Variables de entorno en el servidor
+export DB_URL=jdbc:mysql://prod-server:3306/restaurant_management
+export DB_USERNAME=prod_user
+export DB_PASSWORD=SECURE_PASSWORD
+export DDL_AUTO=validate
+export SHOW_SQL=false
+
+# Compilar
+./gradlew clean build -x test
+
+# Ejecutar
+java -jar build/libs/restaurant-management-0.0.1-SNAPSHOT.jar \
+  --spring.profiles.active=prod
+```
+
 La aplicación estará disponible en: [http://localhost:8080/api/v1](http://localhost:8080/api/v1)
 
 ---

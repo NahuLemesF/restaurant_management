@@ -8,6 +8,7 @@ import com.example.restaurant.observers.ClientSubject;
 import com.example.restaurant.repositories.IClientRepository;
 import com.example.restaurant.utils.mapper.ClientMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    @Transactional
     public Client create(ClientRequestDTO dto) {
         Client newClient = ClientMapper.toEntity(dto);
         Client createdClient = clientRepository.save(newClient);
@@ -31,16 +33,19 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Client getById(Long id) {
         return requireClient(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Client> getAll() {
         return clientRepository.findAll();
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         Client clientToDelete = requireClient(id);
         clientRepository.delete(clientToDelete);
@@ -48,12 +53,13 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
+    @Transactional
     public Client update(Long id, ClientRequestDTO dto) {
         Client existingClient = requireClient(id);
 
-        existingClient.setName(dto.getName());
-        existingClient.setLastName(dto.getLastName());
-        existingClient.setEmail(dto.getEmail());
+        existingClient.setName(dto.name());
+        existingClient.setLastName(dto.lastName());
+        existingClient.setEmail(dto.email());
 
         Client updatedClient = clientRepository.save(existingClient);
         clientSubject.notifyObservers(EventType.UPDATE, updatedClient);

@@ -41,10 +41,7 @@ class ClientServiceImplTest {
         client.setEmail("john.doe@example.com");
         client.setClientType(ClientType.COMMON);
 
-        clientRequestDTO = new ClientRequestDTO();
-        clientRequestDTO.setName("John");
-        clientRequestDTO.setLastName("Doe");
-        clientRequestDTO.setEmail("john.doe@example.com");
+        clientRequestDTO = new ClientRequestDTO("John", "Doe", "john.doe@example.com");
     }
 
     @Test
@@ -139,10 +136,7 @@ class ClientServiceImplTest {
     @Test
     @DisplayName("Update client successfully")
     void testUpdate() {
-        ClientRequestDTO updateDTO = new ClientRequestDTO();
-        updateDTO.setName("Johnny");
-        updateDTO.setLastName("Doe Updated");
-        updateDTO.setEmail("johnny.updated@example.com");
+        ClientRequestDTO updateDTO = new ClientRequestDTO("Johnny", "Doe Updated", "johnny.updated@example.com");
 
         when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
         when(clientRepository.save(any(Client.class))).thenReturn(client);
@@ -161,10 +155,7 @@ class ClientServiceImplTest {
     @Test
     @DisplayName("Update client - Not found")
     void testUpdateNotFound() {
-        ClientRequestDTO updateDTO = new ClientRequestDTO();
-        updateDTO.setName("Johnny");
-        updateDTO.setLastName("Doe Updated");
-        updateDTO.setEmail("johnny.updated@example.com");
+        ClientRequestDTO updateDTO = new ClientRequestDTO("Johnny", "Doe Updated", "johnny.updated@example.com");
 
         when(clientRepository.findById(1L)).thenReturn(Optional.empty());
 

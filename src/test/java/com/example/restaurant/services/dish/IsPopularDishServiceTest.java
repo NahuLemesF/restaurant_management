@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -43,13 +44,13 @@ class IsPopularDishServiceTest {
         dish1.setId(1L);
         dish1.setName("Pasta");
         dish1.setDescription("Delicious pasta with tomato sauce");
-        dish1.setPrice(12.99F);
+        dish1.setPrice(new BigDecimal("12.99"));
 
         Dish dish2 = new Dish();
         dish2.setId(2L);
         dish2.setName("Pizza");
         dish2.setDescription("Cheesy pizza with pepperoni");
-        dish2.setPrice(15.99F);
+        dish2.setPrice(new BigDecimal("15.99"));
 
         List<Dish> dishes = Arrays.asList(dish1, dish2);
 
@@ -75,13 +76,13 @@ class IsPopularDishServiceTest {
         dish1.setId(1L);
         dish1.setName("Pasta");
         dish1.setDescription("Delicious pasta with tomato sauce");
-        dish1.setPrice(12.99F);
+        dish1.setPrice(new BigDecimal("12.99"));
 
         Dish dish2 = new Dish();
         dish2.setId(2L);
         dish2.setName("Pizza");
         dish2.setDescription("Cheesy pizza with pepperoni");
-        dish2.setPrice(15.99F);
+        dish2.setPrice(new BigDecimal("15.99"));
 
         List<Dish> dishes = Arrays.asList(dish1, dish2);
 

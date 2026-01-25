@@ -2,22 +2,16 @@ package com.example.restaurant.dto.order;
 
 import com.example.restaurant.dto.client.ClientResponseDTO;
 import com.example.restaurant.dto.dish.DishResponseDTO;
-import lombok.Getter;
-import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
-@Setter
-public class OrderResponseDTO {
-
-    private Long id;
-    private ClientResponseDTO client;
-    private List<DishResponseDTO> dishes;
-    private Float totalPrice;
-    private LocalDateTime orderDate;
-
-    public OrderResponseDTO() {
-    }
+public record OrderResponseDTO(
+        Long id,
+        ClientResponseDTO client,
+        List<DishResponseDTO> dishes,
+        BigDecimal totalPrice,
+        LocalDateTime orderDate
+) {
 }

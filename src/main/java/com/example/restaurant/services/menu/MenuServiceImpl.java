@@ -10,6 +10,7 @@ import com.example.restaurant.repositories.IDishRepository;
 import com.example.restaurant.repositories.IMenuRepository;
 import com.example.restaurant.utils.mapper.MenuMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +31,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    @Transactional
     public Menu create(MenuRequestDTO dto) {
         List<Dish> dishes = getDishesFromDto(dto);
         Menu newMenu = MenuMapper.convertToEntity(dto, dishes);
@@ -39,16 +41,19 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Menu getById(Long id) {
         return requireMenu(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Menu> getAll() {
         return menuRepository.findAll();
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         Menu menuToDelete = requireMenu(id);
         menuRepository.delete(menuToDelete);
@@ -56,12 +61,13 @@ public class MenuServiceImpl implements MenuService {
     }
 
     @Override
+    @Transactional
     public Menu update(Long id, MenuRequestDTO dto) {
         Menu existingMenu = requireMenu(id);
         List<Dish> dishes = getDishesFromDto(dto);
 
-        existingMenu.setName(dto.getName());
-        existingMenu.setDescription(dto.getDescription());
+        existingMenu.setName(dto.name());
+        existingMenu.setDescription(dto.description());
         existingMenu.setDishes(dishes);
 
         Menu updatedMenu = menuRepository.save(existingMenu);
@@ -80,7 +86,7 @@ public class MenuServiceImpl implements MenuService {
     }
 
     private List<Dish> getDishesFromDto(MenuRequestDTO dto) {
-        return Optional.ofNullable(dto.getDishIds())
+        return Optional.ofNullable(dto.dishIds())
                 .orElse(Collections.emptyList())
                 .stream()
                 .map(this::requireDish)

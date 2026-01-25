@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +39,9 @@ public class Order {
             inverseJoinColumns = @JoinColumn(name = "dish_id"))
     private List<Dish> dishes = new ArrayList<>();
 
-    private Float totalPrice = 0.0f;
+    private BigDecimal totalPrice = BigDecimal.ZERO;
 
-    public Order(Client client, List<Dish> dishes, Long id, Float totalPrice) {
+    public Order(Client client, List<Dish> dishes, Long id, BigDecimal totalPrice) {
         this.client = client;
         this.dishes = dishes;
         this.id = id;

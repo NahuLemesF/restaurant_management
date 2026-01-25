@@ -48,10 +48,7 @@ class ClientControllerTest {
     void addClient() throws Exception {
         when(clientService.create(any(ClientRequestDTO.class))).thenReturn(client);
 
-        ClientRequestDTO requestDTO = new ClientRequestDTO();
-        requestDTO.setName("Martin");
-        requestDTO.setLastName("Garmendia");
-        requestDTO.setEmail("holasoymartin@example.com");
+        ClientRequestDTO requestDTO = new ClientRequestDTO("Martin", "Garmendia", "holasoymartin@example.com");
 
         mockMvc.perform(post("/clients")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -105,10 +102,7 @@ class ClientControllerTest {
     void updateClient() throws Exception {
         when(clientService.update(anyLong(), any(ClientRequestDTO.class))).thenReturn(client);
 
-        ClientRequestDTO requestDTO = new ClientRequestDTO();
-        requestDTO.setName("Martin");
-        requestDTO.setLastName("Garmendia");
-        requestDTO.setEmail("holasoymartin@example.com");
+        ClientRequestDTO requestDTO = new ClientRequestDTO("Martin", "Garmendia", "holasoymartin@example.com");
 
         mockMvc.perform(put("/clients/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)

@@ -53,10 +53,7 @@ class MenuServiceImplTest {
         dish2.setId(2L);
         dish2.setName("Dish 2");
 
-        menuRequestDTO = new MenuRequestDTO();
-        menuRequestDTO.setName("Test Menu");
-        menuRequestDTO.setDescription("Test Description");
-        menuRequestDTO.setDishIds(Arrays.asList(1L, 2L));
+        menuRequestDTO = new MenuRequestDTO("Test Menu", "Test Description", Arrays.asList(1L, 2L));
     }
 
     @Test
@@ -80,10 +77,7 @@ class MenuServiceImplTest {
     @Test
     @DisplayName("Create menu successfully without dishes")
     void testCreateWithoutDishes() {
-        MenuRequestDTO dtoWithoutDishes = new MenuRequestDTO();
-        dtoWithoutDishes.setName("Test Menu");
-        dtoWithoutDishes.setDescription("Test Description");
-        dtoWithoutDishes.setDishIds(null);
+        MenuRequestDTO dtoWithoutDishes = new MenuRequestDTO("Test Menu", "Test Description", null);
 
         when(menuRepository.save(any(Menu.class))).thenReturn(menu);
 
@@ -187,10 +181,7 @@ class MenuServiceImplTest {
     @Test
     @DisplayName("Update menu successfully with dishes")
     void testUpdateWithDishes() {
-        MenuRequestDTO updateDTO = new MenuRequestDTO();
-        updateDTO.setName("Updated Menu");
-        updateDTO.setDescription("Updated Description");
-        updateDTO.setDishIds(Arrays.asList(1L, 2L));
+        MenuRequestDTO updateDTO = new MenuRequestDTO("Updated Menu", "Updated Description", Arrays.asList(1L, 2L));
 
         when(menuRepository.findById(1L)).thenReturn(Optional.of(menu));
         when(dishRepository.findById(1L)).thenReturn(Optional.of(dish1));
@@ -212,10 +203,7 @@ class MenuServiceImplTest {
     @Test
     @DisplayName("Update menu successfully without dishes")
     void testUpdateWithoutDishes() {
-        MenuRequestDTO updateDTO = new MenuRequestDTO();
-        updateDTO.setName("Updated Menu");
-        updateDTO.setDescription("Updated Description");
-        updateDTO.setDishIds(null);
+        MenuRequestDTO updateDTO = new MenuRequestDTO("Updated Menu", "Updated Description", null);
 
         when(menuRepository.findById(1L)).thenReturn(Optional.of(menu));
         when(menuRepository.save(any(Menu.class))).thenReturn(menu);
@@ -234,9 +222,7 @@ class MenuServiceImplTest {
     @Test
     @DisplayName("Update menu - Menu not found")
     void testUpdateMenuNotFound() {
-        MenuRequestDTO updateDTO = new MenuRequestDTO();
-        updateDTO.setName("Updated Menu");
-        updateDTO.setDescription("Updated Description");
+        MenuRequestDTO updateDTO = new MenuRequestDTO("Updated Menu", "Updated Description", null);
 
         when(menuRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -254,10 +240,7 @@ class MenuServiceImplTest {
     @Test
     @DisplayName("Update menu - Dish not found")
     void testUpdateDishNotFound() {
-        MenuRequestDTO updateDTO = new MenuRequestDTO();
-        updateDTO.setName("Updated Menu");
-        updateDTO.setDescription("Updated Description");
-        updateDTO.setDishIds(Arrays.asList(1L, 3L));
+        MenuRequestDTO updateDTO = new MenuRequestDTO("Updated Menu", "Updated Description", Arrays.asList(1L, 3L));
 
         when(menuRepository.findById(1L)).thenReturn(Optional.of(menu));
         when(dishRepository.findById(1L)).thenReturn(Optional.of(dish1));
@@ -278,10 +261,7 @@ class MenuServiceImplTest {
     @Test
     @DisplayName("Create menu with empty dish list")
     void testCreateWithEmptyDishList() {
-        MenuRequestDTO dtoWithEmptyList = new MenuRequestDTO();
-        dtoWithEmptyList.setName("Test Menu");
-        dtoWithEmptyList.setDescription("Test Description");
-        dtoWithEmptyList.setDishIds(Collections.emptyList());
+        MenuRequestDTO dtoWithEmptyList = new MenuRequestDTO("Test Menu", "Test Description", Collections.emptyList());
 
         when(menuRepository.save(any(Menu.class))).thenReturn(menu);
 

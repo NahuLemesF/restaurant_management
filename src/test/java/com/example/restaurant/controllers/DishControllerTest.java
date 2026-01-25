@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,7 +45,7 @@ class DishControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(new DishController(dishService)).build();
 
         menu = new Menu(1L, "Lunch Menu", "Delicious menu options");
-        dish = new Dish(1L, "Pasta", "Delicious pasta", 12.99F, DishType.COMMON, menu);
+        dish = new Dish(1L, "Pasta", "Delicious pasta", new BigDecimal("12.99"), DishType.COMMON, menu);
     }
 
     @Test
@@ -52,7 +53,7 @@ class DishControllerTest {
     void addDish() throws Exception {
         when(dishService.create(any(DishRequestDTO.class))).thenReturn(dish);
 
-        DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", 12.99F, 1L);
+        DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", new BigDecimal("12.99"), 1L);
 
         mockMvc.perform(post("/dishes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -90,7 +91,7 @@ class DishControllerTest {
     void getAllDishes() throws Exception {
         List<Dish> dishes = List.of(
                 dish,
-                new Dish(2L, "Pizza", "Delicious pizza", 15.99F, DishType.COMMON, menu)
+                new Dish(2L, "Pizza", "Delicious pizza", new BigDecimal("15.99"), DishType.COMMON, menu)
         );
 
         when(dishService.getAll()).thenReturn(dishes);
@@ -110,7 +111,7 @@ class DishControllerTest {
     void updateDish() throws Exception {
         when(dishService.update(anyLong(), any(DishRequestDTO.class))).thenReturn(dish);
 
-        DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", 12.99F, 1L);
+        DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", new BigDecimal("12.99"), 1L);
 
         mockMvc.perform(put("/dishes/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -138,21 +139,22 @@ class DishControllerTest {
     }
 
     @Test
-    @DisplayName("Test DishResponseDTO Getters and Setters")
+    @DisplayName("Test DishResponseDTO Record")
     void testDishResponseDTO() {
-        DishResponseDTO dishResponseDTO = new DishResponseDTO();
-        dishResponseDTO.setId(1L);
-        dishResponseDTO.setName("Pasta");
-        dishResponseDTO.setDescription("Delicious pasta");
-        dishResponseDTO.setPrice(12.99F);
-        dishResponseDTO.setDishType("COMMON");
-        dishResponseDTO.setMenuName("Lunch Menu");
+        DishResponseDTO dishResponseDTO = new DishResponseDTO(
+                1L,
+                "Pasta",
+                "Delicious pasta",
+                new BigDecimal("12.99"),
+                "COMMON",
+                "Lunch Menu"
+        );
 
-        assertEquals(1L, dishResponseDTO.getId());
-        assertEquals("Pasta", dishResponseDTO.getName());
-        assertEquals("Delicious pasta", dishResponseDTO.getDescription());
-        assertEquals(12.99F, dishResponseDTO.getPrice());
-        assertEquals("COMMON", dishResponseDTO.getDishType());
-        assertEquals("Lunch Menu", dishResponseDTO.getMenuName());
+        assertEquals(1L, dishResponseDTO.id());
+        assertEquals("Pasta", dishResponseDTO.name());
+        assertEquals("Delicious pasta", dishResponseDTO.description());
+        assertEquals(new BigDecimal("12.99"), dishResponseDTO.price());
+        assertEquals("COMMON", dishResponseDTO.dishType());
+        assertEquals("Lunch Menu", dishResponseDTO.menuName());
     }
 }

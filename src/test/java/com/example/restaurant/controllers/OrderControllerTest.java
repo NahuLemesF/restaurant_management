@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,10 +51,10 @@ class OrderControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(new OrderController(orderService)).build();
 
         Menu menu = new Menu(1L, "Lunch Menu", "Delicious options", new ArrayList<>());
-        dish = new Dish(1L, "Pasta", "Delicious pasta", 12.99F, DishType.COMMON, menu);
+        dish = new Dish(1L, "Pasta", "Delicious pasta", new BigDecimal("12.99"), DishType.COMMON, menu);
 
         client = new Client(1L, "John", "Doe", "john.doe@example.com", ClientType.COMMON);
-        order = new Order(client, List.of(dish), 1L, 12.99F);
+        order = new Order(client, List.of(dish), 1L, new BigDecimal("12.99"));
     }
 
 
@@ -62,9 +63,7 @@ class OrderControllerTest {
     void createOrder() throws Exception {
         when(orderService.create(any(OrderRequestDTO.class))).thenReturn(order);
 
-        OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
-        orderRequestDTO.setClientId(1L);
-        orderRequestDTO.setDishIds(List.of(1L));
+        OrderRequestDTO orderRequestDTO = new OrderRequestDTO(1L, List.of(1L));
 
         mockMvc.perform(post("/orders")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -74,7 +73,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.id").value(order.getId()))
                 .andExpect(jsonPath("$.client.name").value(order.getClient().getName()))
                 .andExpect(jsonPath("$.dishes[0].name").value(order.getDishes().get(0).getName()))
-                .andExpect(jsonPath("$.totalPrice").value(order.getTotalPrice()));
+                .andExpect(jsonPath("$.totalPrice").value(12.99));
 
         verify(orderService).create(any(OrderRequestDTO.class));
     }
@@ -98,7 +97,7 @@ class OrderControllerTest {
     @Test
     @DisplayName("Get All Orders")
     void getAllOrders() throws Exception {
-        List<Order> orders = List.of(order, new Order(client, List.of(dish), 2L, 25.98F));
+        List<Order> orders = List.of(order, new Order(client, List.of(dish), 2L, new BigDecimal("25.98")));
 
         when(orderService.getAll()).thenReturn(orders);
 
@@ -117,9 +116,7 @@ class OrderControllerTest {
     void updateOrder() throws Exception {
         when(orderService.update(anyLong(), any(OrderRequestDTO.class))).thenReturn(order);
 
-        OrderRequestDTO orderRequestDTO = new OrderRequestDTO();
-        orderRequestDTO.setClientId(1L);
-        orderRequestDTO.setDishIds(List.of(1L));
+        OrderRequestDTO orderRequestDTO = new OrderRequestDTO(1L, List.of(1L));
 
         mockMvc.perform(put("/orders/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -129,7 +126,7 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.id").value(order.getId()))
                 .andExpect(jsonPath("$.client.name").value(order.getClient().getName()))
                 .andExpect(jsonPath("$.dishes[0].name").value(order.getDishes().get(0).getName()))
-                .andExpect(jsonPath("$.totalPrice").value(order.getTotalPrice()));
+                .andExpect(jsonPath("$.totalPrice").value(12.99));
 
         verify(orderService).update(anyLong(), any(OrderRequestDTO.class));
     }
@@ -155,6 +152,6 @@ class OrderControllerTest {
 
         OrderResponseDTO orderResponseDTO = OrderMapper.toDto(order);
 
-        assertEquals(0.0f, orderResponseDTO.getTotalPrice(), "Total price should be 0.0 when order.getTotalPrice() is null");
+        assertEquals(BigDecimal.ZERO, orderResponseDTO.totalPrice(), "Total price should be 0 when order.getTotalPrice() is null");
     }
 }

@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class Dish {
 
     private String name;
     private String description;
-    private Float price;
+    private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
     private DishType dishType = DishType.COMMON;
@@ -39,7 +40,7 @@ public class Dish {
     @ManyToMany(mappedBy = "dishes")
     private List<Order> orders = new ArrayList<>();
 
-    public Dish(Long id, String name, String description, Float price, DishType dishType, Menu menu) {
+    public Dish(Long id, String name, String description, BigDecimal price, DishType dishType, Menu menu) {
         this.id = id;
         this.name = name;
         this.description = description;

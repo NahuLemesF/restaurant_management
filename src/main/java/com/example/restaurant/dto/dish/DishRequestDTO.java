@@ -1,30 +1,23 @@
 package com.example.restaurant.dto.dish;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
-public class DishRequestDTO {
+import java.math.BigDecimal;
 
-    @NotBlank(message = "El nombre es obligatorio")
-    private String name;
+public record DishRequestDTO(
+        @NotBlank(message = "El nombre es obligatorio")
+        String name,
 
-    @NotBlank(message = "La descripción es obligatoria")
-    private String description;
+        @NotBlank(message = "La descripción es obligatoria")
+        String description,
 
-    @NotNull(message = "El precio es obligatorio")
-    private Float price;
+        @NotNull(message = "El precio es obligatorio")
+        @DecimalMin(value = "0.01", message = "El precio debe ser mayor a 0")
+        BigDecimal price,
 
-    private Long menuId;
-
-    public DishRequestDTO(String name, String description, Float price, Long menuId) {
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.menuId = menuId;
-    }
-
+        @NotNull(message = "El ID del menú es obligatorio")
+        Long menuId
+) {
 }

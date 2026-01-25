@@ -7,6 +7,7 @@ import com.example.restaurant.observers.DishSubject;
 import com.example.restaurant.repositories.IDishRepository;
 import com.example.restaurant.repositories.IOrderRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class IsPopularDishService {
         this.dishSubject = dishSubject;
     }
 
+    @Transactional
     public void markPopularDishes(List<Dish> dishes) {
         dishes.forEach(dish -> {
             Long orderCount = orderRepository.countByDishesId(dish.getId());

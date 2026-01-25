@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -47,10 +48,10 @@ class DishServiceImplTest {
         dish.setId(1L);
         dish.setName("Test Dish");
         dish.setDescription("Test Description");
-        dish.setPrice(10.99f);
+        dish.setPrice(new BigDecimal("10.99"));
         dish.setMenu(menu);
 
-        dishRequestDTO = new DishRequestDTO("Test Dish", "Test Description", 10.99f, 1L);
+        dishRequestDTO = new DishRequestDTO("Test Dish", "Test Description", new BigDecimal("10.99"), 1L);
     }
 
     @Test
@@ -163,7 +164,7 @@ class DishServiceImplTest {
         newMenu.setId(2L);
         newMenu.setName("New Menu");
 
-        DishRequestDTO updateDTO = new DishRequestDTO("Updated Dish", "Updated Description", 15.99f, 2L);
+        DishRequestDTO updateDTO = new DishRequestDTO("Updated Dish", "Updated Description", new BigDecimal("15.99"), 2L);
 
         when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
         when(menuRepository.findById(2L)).thenReturn(Optional.of(newMenu));
@@ -174,7 +175,7 @@ class DishServiceImplTest {
         assertNotNull(result);
         assertEquals("Updated Dish", dish.getName());
         assertEquals("Updated Description", dish.getDescription());
-        assertEquals(15.99f, dish.getPrice());
+        assertEquals(new BigDecimal("15.99"), dish.getPrice());
         assertEquals(newMenu, dish.getMenu());
         verify(dishRepository).findById(1L);
         verify(menuRepository).findById(2L);
@@ -185,7 +186,7 @@ class DishServiceImplTest {
     @Test
     @DisplayName("Update dish - Dish not found")
     void testUpdateDishNotFound() {
-        DishRequestDTO updateDTO = new DishRequestDTO("Updated Dish", "Updated Description", 15.99f, 1L);
+        DishRequestDTO updateDTO = new DishRequestDTO("Updated Dish", "Updated Description", new BigDecimal("15.99"), 1L);
         when(dishRepository.findById(1L)).thenReturn(Optional.empty());
 
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
@@ -202,7 +203,7 @@ class DishServiceImplTest {
     @Test
     @DisplayName("Update dish - Menu not found")
     void testUpdateMenuNotFound() {
-        DishRequestDTO updateDTO = new DishRequestDTO("Updated Dish", "Updated Description", 15.99f, 2L);
+        DishRequestDTO updateDTO = new DishRequestDTO("Updated Dish", "Updated Description", new BigDecimal("15.99"), 2L);
         when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
         when(menuRepository.findById(2L)).thenReturn(Optional.empty());
 

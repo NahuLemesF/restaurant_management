@@ -10,6 +10,7 @@ import com.example.restaurant.repositories.IDishRepository;
 import com.example.restaurant.repositories.IMenuRepository;
 import com.example.restaurant.utils.mapper.DishMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,8 +28,9 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
+    @Transactional
     public Dish create(DishRequestDTO dto) {
-        Menu menu = requireMenu(dto.getMenuId());
+        Menu menu = requireMenu(dto.menuId());
         Dish newDish = DishMapper.convertToEntity(dto, menu);
         Dish createdDish = dishRepository.save(newDish);
         dishSubject.notifyObservers(EventType.CREATE, createdDish);
@@ -36,16 +38,19 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Dish getById(Long id) {
         return requireDish(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Dish> getAll() {
         return dishRepository.findAll();
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         Dish dishToDelete = requireDish(id);
         dishRepository.delete(dishToDelete);
@@ -53,13 +58,14 @@ public class DishServiceImpl implements DishService {
     }
 
     @Override
+    @Transactional
     public Dish update(Long id, DishRequestDTO dto) {
         Dish existingDish = requireDish(id);
-        Menu menu = requireMenu(dto.getMenuId());
+        Menu menu = requireMenu(dto.menuId());
 
-        existingDish.setName(dto.getName());
-        existingDish.setDescription(dto.getDescription());
-        existingDish.setPrice(dto.getPrice());
+        existingDish.setName(dto.name());
+        existingDish.setDescription(dto.description());
+        existingDish.setPrice(dto.price());
         existingDish.setMenu(menu);
 
         Dish updatedDish = dishRepository.save(existingDish);

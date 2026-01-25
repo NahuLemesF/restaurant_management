@@ -13,7 +13,9 @@ import com.example.restaurant.services.client.ClientService;
 import com.example.restaurant.services.dish.DishService;
 import com.example.restaurant.utils.OrderPriceCalculator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,9 +37,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public Order create(OrderRequestDTO dto) {
-        Client client = clientService.getById(dto.getClientId());
-        List<Dish> dishes = dto.getDishIds().stream().map(dishService::getById).toList();
+        Client client = clientService.getById(dto.clientId());
+        List<Dish> dishes = dto.dishIds().stream().map(dishService::getById).toList();
 
         Order order = new Order();
         order.setClient(client);
@@ -52,17 +55,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Order getById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Orden", "id", id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Order> getAll() {
         return orderRepository.findAll();
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         Order order = getById(id);
         orderRepository.delete(order);
@@ -70,11 +76,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public Order update(Long id, OrderRequestDTO dto) {
         Order existing = getById(id);
 
-        Client client = clientService.getById(dto.getClientId());
-        List<Dish> dishes = dto.getDishIds().stream().map(dishService::getById).toList();
+        Client client = clientService.getById(dto.clientId());
+        List<Dish> dishes = dto.dishIds().stream().map(dishService::getById).toList();
 
         existing.setClient(client);
         existing.setDishes(dishes);
@@ -89,7 +96,7 @@ public class OrderServiceImpl implements OrderService {
     private void recalculateAndProcess(Order order) {
         orderProcessingChain.process(order);
 
-        float totalPrice = OrderPriceCalculator.calculateTotalPrice(
+        BigDecimal totalPrice = OrderPriceCalculator.calculateTotalPrice(
                 order.getDishes(),
                 order.getClient().getClientType()
         );

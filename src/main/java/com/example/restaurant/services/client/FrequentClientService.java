@@ -8,6 +8,7 @@ import com.example.restaurant.observers.ClientSubject;
 import com.example.restaurant.repositories.IClientRepository;
 import com.example.restaurant.repositories.IOrderRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class FrequentClientService {
@@ -24,6 +25,7 @@ public class FrequentClientService {
         this.clientSubject = clientSubject;
     }
 
+    @Transactional
     public void updateClientTypeIfFrequent(Long clientId) {
         Long ordersCount = orderRepository.countByClientId(clientId);
 

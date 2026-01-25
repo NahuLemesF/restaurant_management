@@ -1,20 +1,13 @@
 package com.example.restaurant.dto.dish;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.math.BigDecimal;
 
-@Getter
-@Setter
-public class DishResponseDTO {
-
-    private Long id;
-    private String name;
-    private String description;
-    private Float price;
-    private String dishType;
-    private String menuName;
-
-    public DishResponseDTO() {
-    }
-
+public record DishResponseDTO(
+        Long id,
+        String name,
+        String description,
+        BigDecimal price,
+        String dishType,
+        String menuName
+) {
 }
