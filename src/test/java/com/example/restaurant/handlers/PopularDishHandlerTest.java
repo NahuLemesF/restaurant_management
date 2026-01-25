@@ -31,6 +31,6 @@ class PopularDishHandlerTest {
 
         popularDishHandler.handle(order);
 
-        verify(isPopularDishService, times(1)).execute(dishes);
+        verify(isPopularDishService, times(1)).markPopularDishes(dishes);
     }
 }

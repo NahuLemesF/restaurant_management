@@ -37,8 +37,8 @@ class IsPopularDishServiceTest {
     }
 
     @Test
-    @DisplayName("Test IsPopularDishService execute method - Mark as Popular")
-    void testExecuteMarkAsPopular() {
+    @DisplayName("Test IsPopularDishService markPopularDishes method - Mark as Popular")
+    void testMarkPopularDishesMarkAsPopular() {
         Dish dish1 = new Dish();
         dish1.setId(1L);
         dish1.setName("Pasta");
@@ -56,7 +56,7 @@ class IsPopularDishServiceTest {
         when(orderRepository.countByDishesId(1L)).thenReturn(150L);
         when(orderRepository.countByDishesId(2L)).thenReturn(50L);
 
-        isPopularDishService.execute(dishes);
+        isPopularDishService.markPopularDishes(dishes);
 
         verify(orderRepository).countByDishesId(1L);
         verify(orderRepository).countByDishesId(2L);
@@ -69,8 +69,8 @@ class IsPopularDishServiceTest {
     }
 
     @Test
-    @DisplayName("Test IsPopularDishService execute method - No Popular Dishes")
-    void testExecuteNoPopularDishes() {
+    @DisplayName("Test IsPopularDishService markPopularDishes method - No Popular Dishes")
+    void testMarkPopularDishesNoPopularDishes() {
         Dish dish1 = new Dish();
         dish1.setId(1L);
         dish1.setName("Pasta");
@@ -88,7 +88,7 @@ class IsPopularDishServiceTest {
         when(orderRepository.countByDishesId(1L)).thenReturn(50L);
         when(orderRepository.countByDishesId(2L)).thenReturn(30L);
 
-        isPopularDishService.execute(dishes);
+        isPopularDishService.markPopularDishes(dishes);
 
         verify(orderRepository).countByDishesId(1L);
         verify(orderRepository).countByDishesId(2L);

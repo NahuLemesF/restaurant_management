@@ -18,6 +18,6 @@ public class PopularDishHandler implements IOrderHandler {
 
     @Override
     public void handle(Order order) {
-        isPopularDishService.execute(order.getDishes());
+        isPopularDishService.markPopularDishes(order.getDishes());
     }
 }
