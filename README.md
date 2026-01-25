@@ -1,43 +1,50 @@
-# Restaurant Management Application
+# Restaurant Management API
 
-> ✅ **Production Ready** - Version 0.0.1-SNAPSHOT  
-> 🔒 Secure | ⚡ Transactional | 💰 BigDecimal Precision | 📦 Immutable DTOs
+> REST API desarrollada en Java con Spring Boot
+> 
+> Enfoque en buenas prácticas, diseño limpio y configuración por entorno
 
 ## 📋 Descripción General
-Esta aplicación es un sistema de gestión de restaurantes desarrollado en Java utilizando Spring Boot. Proporciona la capacidad de administrar clientes, menús, platos y órdenes, con un diseño basado en buenas prácticas de programación y arquitecturas modernas.
+Restaurant Management API es una aplicación backend desarrollada en Java + Spring Boot que modela un sistema de gestión de restaurantes.
+Permite administrar clientes, menús, platos y órdenes, aplicando principios de diseño orientado a objetos, separación de capas y configuración flexible por entorno.
 
-### ⚡ Características Técnicas Destacadas
-- ✅ **DTOs como Java Records** - Inmutabilidad y código conciso
-- ✅ **BigDecimal para precios** - Precisión monetaria perfecta
-- ✅ **@Transactional completo** - Integridad de datos garantizada
-- ✅ **Variables de entorno** - Configuración segura
-- ✅ **Profiles de Spring** - Configuración por ambiente (dev/prod)
-- ✅ **Validaciones robustas** - Jakarta Validation
-- ✅ **Patrones de diseño** - Observer, Chain of Responsibility, Strategy
-- ✅ **100% Tests pasando** - Cobertura comprehensiva
+El proyecto está pensado como backend demostrativo para portfolio, priorizando claridad, mantenibilidad y criterio técnico por sobre complejidad innecesaria
+
+## ⚙️ Tecnologías Utilizadas
+- **Java 17**
+- **Spring Boot**
+- **Spring Data JPA (Hibernate)**
+- **MySQL**
+- **Gradle**
+- **Swagger / OpenAPI**
+- **Jakarta Validation**
+- **JUnit 5 + Mockito**
+- **Lombok**
+
+### 🧠 Decisiones Técnicas Relevantes
+- **Uso de DTOs inmutables** (Java Records) para transporte de datos.
+- **BigDecimal** para el manejo de precios y valores monetarios.
+- **Separación clara entre Controller / Service / Repository.**
+- **Uso de transacciones** (@Transactional) en la capa de servicio.
+- **Validaciones declarativas** con Jakarta Validation.
+- Configuración externa mediante **variables de entorno**.
+- **Perfiles de Spring** para separar configuración dev y prod.
 
 ---
 
-## Características Principales
+## 📦 Modelo de Dominio
 
-### 1. Entidades
+### Entidades Principales
 - **Client**: Representa a los clientes con datos personales y su tipo (común o frecuente).
 - **Menu**: Contiene los menús disponibles, cada uno asociado con una lista de platos.
-- **Dish**: Representa los platos con detalles como nombre, descripción, precio (BigDecimal) y tipo (común o popular).
+- **Dish**: Representa los platos con detalles como nombre, descripción, precio y tipo (común o popular).
 - **Order**: Registra las órdenes de los clientes, cada una con una lista de platos seleccionados.
 
-### 2. Relaciones
+### Relaciones
 - Un cliente puede realizar múltiples órdenes.
 - Una órden debe contener al menos un plato.
 - Los platos están asociados a un menú.
 - Una relación muchos-a-muchos entre platos y órdenes.
-
-### 3. Características Técnicas
-- **API RESTful** para todas las entidades.
-- **Validación de datos** con `Jakarta Validation`.
-- **Gestor de base de datos**: MySQL.
-- **Hibernate** para persistencia de datos.
-- **Swagger/OpenAPI** para documentación automática.
 
 ---
 
@@ -48,73 +55,47 @@ Esta aplicación es un sistema de gestión de restaurantes desarrollado en Java 
 - **Gradle**.
 - **MySQL 8.0+**.
 
-### 2. Configuración de la Base de Datos
+### 2. Base de Datos (Entorno Local)
 
-#### a) Crear la base de datos
+#### Crear la base de datos:
 ```sql
 CREATE DATABASE restaurant_management;
-CREATE USER 'restaurant'@'localhost' IDENTIFIED BY 'tu_contraseña_segura';
-GRANT ALL PRIVILEGES ON restaurant_management.* TO 'restaurant'@'localhost';
-FLUSH PRIVILEGES;
 ```
+_El esquema se genera automáticamente a partir de las entidades JPA._
 
-#### b) Ejecutar migración (IMPORTANTE - Solo primera vez)
+
+### 3. Variables de Entorno
+**Crear el archivo .env en la raíz del proyecto (no versionado):**
 ```bash
-mysql -u restaurant -p restaurant_management < migration.sql
-```
+SPRING_PROFILES_ACTIVE=dev
 
-#### c) Configurar variables de entorno
-```bash
-# Copiar el archivo de ejemplo
-cp .env.example .env
+DB_URL=jdbc:mysql://localhost:3306/restaurant_management
+DB_USERNAME=root
+DB_PASSWORD=
 
-# Editar con tus credenciales
-nano .env
-```
-
-**Contenido del .env:**
-```bash
-DB_URL=jdbc:mysql://localhost:3306/restaurant_management?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-DB_USERNAME=restaurant
-DB_PASSWORD=tu_contraseña_segura
 DDL_AUTO=update
 SHOW_SQL=true
-FORMAT_SQL=true
 ```
 
-### 3. Compilación y Ejecución
-
-#### Desarrollo
+**Cargar variables y ejecutar:**
 ```bash
-# Cargar variables de entorno
 export $(cat .env | xargs)
-
-# Ejecutar con profile de desarrollo
-./gradlew bootRun --args='--spring.profiles.active=dev'
+./gradlew bootRun
 ```
 
-#### Producción
-```bash
-# Variables de entorno en el servidor
-export DB_URL=jdbc:mysql://prod-server:3306/restaurant_management
-export DB_USERNAME=prod_user
-export DB_PASSWORD=SECURE_PASSWORD
-export DDL_AUTO=validate
-export SHOW_SQL=false
+### 4. Acceso a la API
 
-# Compilar
-./gradlew clean build -x test
+- **API base:** 
 
-# Ejecutar
-java -jar build/libs/restaurant-management-0.0.1-SNAPSHOT.jar \
-  --spring.profiles.active=prod
-```
+`http://localhost:8080/api/v1`
 
-La aplicación estará disponible en: [http://localhost:8080/api/v1](http://localhost:8080/api/v1)
+- **Documentación Swagger:**
+
+`http://localhost:8080/swagger-ui.html`
 
 ---
 
-## Endpoints Principales
+## 🔗Endpoints Principales
 
 ### Client
 - **GET** `/clients`: Obtiene todos los clientes.
@@ -146,7 +127,7 @@ La aplicación estará disponible en: [http://localhost:8080/api/v1](http://loca
 
 ---
 
-## Diagrama de Clases
+## 📐 Diagrama de Clases (UML)
 
 ![image](https://github.com/user-attachments/assets/3ea543e7-8874-4aca-bf64-5317a3106ac8)
 
@@ -156,7 +137,7 @@ El sistema cuenta con un diagrama UML que describe las relaciones entre las enti
 
 ---
 
-## Diagrama Relacional
+## 📐 Diagrama Relacional
 
 ![image](https://github.com/user-attachments/assets/34293338-0d98-4ee2-a3d6-13aec99d0efb)
 
@@ -172,6 +153,15 @@ Este modelo incluye las claves primarias, claves foráneas y las relaciones (1:1
 
 ---
 
-## Autor
-Proyecto desarrollado por Nahu Lemes.
+## 👤 Autor
+Proyecto desarrollado por **Nahuel Lemes**.
+- GitHub: [NahuLemesF](https://github.com/NahuLemesF)
+- LinkedIn: [Nahuel Lemes](https://www.linkedin.com/in/nahuel-lemes/)
+
+---
+
+## 📝 Notas
+- El proyecto está pensado para uso **demostrativo / educativo**.
+- En entorno local se utiliza MySQL con usuario `root` sin contraseña.
+- En un entorno productivo real, las credenciales y configuraciones deben ajustarse mediante variables de entorno seguras.
 
