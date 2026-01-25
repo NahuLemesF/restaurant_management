@@ -2,6 +2,7 @@ package com.example.restaurant.services.client;
 
 import com.example.restaurant.constants.ClientType;
 import com.example.restaurant.constants.EventType;
+import com.example.restaurant.exception.ResourceNotFoundException;
 import com.example.restaurant.models.Client;
 import com.example.restaurant.observers.ClientSubject;
 import com.example.restaurant.repositories.IClientRepository;
@@ -28,7 +29,7 @@ public class FrequentClientService {
 
         if (ordersCount >= 10) {
             Client client = clientRepository.findById(clientId)
-                    .orElseThrow(() -> new RuntimeException("Cliente con el id " + clientId + " no encontrado"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Cliente", "id", clientId));
 
             if (client.getClientType() != ClientType.FREQUENT) {
                 client.setClientType(ClientType.FREQUENT);

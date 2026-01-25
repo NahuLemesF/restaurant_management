@@ -3,6 +3,7 @@ package com.example.restaurant.services.client;
 import com.example.restaurant.constants.ClientType;
 import com.example.restaurant.constants.EventType;
 import com.example.restaurant.dto.client.ClientRequestDTO;
+import com.example.restaurant.exception.ResourceNotFoundException;
 import com.example.restaurant.models.Client;
 import com.example.restaurant.observers.ClientSubject;
 import com.example.restaurant.repositories.IClientRepository;
@@ -80,11 +81,11 @@ class ClientServiceImplTest {
     void testGetByIdNotFound() {
         when(clientRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             clientService.getById(1L);
         });
 
-        assertEquals("Cliente con el id 1 no encontrado", exception.getMessage());
+        assertEquals("Cliente no encontrado con id: '1'", exception.getMessage());
         verify(clientRepository).findById(1L);
     }
 
@@ -125,11 +126,11 @@ class ClientServiceImplTest {
     void testDeleteNotFound() {
         when(clientRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             clientService.delete(1L);
         });
 
-        assertEquals("Cliente con el id 1 no encontrado", exception.getMessage());
+        assertEquals("Cliente no encontrado con id: '1'", exception.getMessage());
         verify(clientRepository).findById(1L);
         verify(clientRepository, never()).delete(any());
         verify(clientSubject, never()).notifyObservers(any(), any());
@@ -167,11 +168,11 @@ class ClientServiceImplTest {
 
         when(clientRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             clientService.update(1L, updateDTO);
         });
 
-        assertEquals("Cliente con el id 1 no encontrado", exception.getMessage());
+        assertEquals("Cliente no encontrado con id: '1'", exception.getMessage());
         verify(clientRepository).findById(1L);
         verify(clientRepository, never()).save(any());
         verify(clientSubject, never()).notifyObservers(any(), any());

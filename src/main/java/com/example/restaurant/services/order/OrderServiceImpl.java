@@ -2,6 +2,7 @@ package com.example.restaurant.services.order;
 
 import com.example.restaurant.constants.EventType;
 import com.example.restaurant.dto.order.OrderRequestDTO;
+import com.example.restaurant.exception.ResourceNotFoundException;
 import com.example.restaurant.handlers.OrderProcessingChain;
 import com.example.restaurant.models.Client;
 import com.example.restaurant.models.Dish;
@@ -53,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order getById(Long id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Orden con el id " + id + " no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Orden", "id", id));
     }
 
     @Override

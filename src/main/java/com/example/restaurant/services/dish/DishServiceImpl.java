@@ -2,6 +2,7 @@ package com.example.restaurant.services.dish;
 
 import com.example.restaurant.constants.EventType;
 import com.example.restaurant.dto.dish.DishRequestDTO;
+import com.example.restaurant.exception.ResourceNotFoundException;
 import com.example.restaurant.models.Dish;
 import com.example.restaurant.models.Menu;
 import com.example.restaurant.observers.DishSubject;
@@ -68,11 +69,11 @@ public class DishServiceImpl implements DishService {
 
     private Dish requireDish(Long id) {
         return dishRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Plato con el id " + id + " no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Plato", "id", id));
     }
 
     private Menu requireMenu(Long id) {
         return menuRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Menú con el id " + id + " no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Menú", "id", id));
     }
 }

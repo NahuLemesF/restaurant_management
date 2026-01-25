@@ -2,6 +2,7 @@ package com.example.restaurant.services.dish;
 
 import com.example.restaurant.constants.EventType;
 import com.example.restaurant.dto.dish.DishRequestDTO;
+import com.example.restaurant.exception.ResourceNotFoundException;
 import com.example.restaurant.models.Dish;
 import com.example.restaurant.models.Menu;
 import com.example.restaurant.observers.DishSubject;
@@ -73,11 +74,11 @@ class DishServiceImplTest {
     void testCreateMenuNotFound() {
         when(menuRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             dishService.create(dishRequestDTO);
         });
 
-        assertEquals("Menú con el id 1 no encontrado", exception.getMessage());
+        assertEquals("Menú no encontrado con id: '1'", exception.getMessage());
         verify(menuRepository).findById(1L);
         verify(dishRepository, never()).save(any(Dish.class));
         verify(dishSubject, never()).notifyObservers(any(), any());
@@ -101,11 +102,11 @@ class DishServiceImplTest {
     void testGetByIdNotFound() {
         when(dishRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             dishService.getById(1L);
         });
 
-        assertEquals("Plato con el id 1 no encontrado", exception.getMessage());
+        assertEquals("Plato no encontrado con id: '1'", exception.getMessage());
         verify(dishRepository).findById(1L);
     }
 
@@ -145,11 +146,11 @@ class DishServiceImplTest {
     void testDeleteNotFound() {
         when(dishRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             dishService.delete(1L);
         });
 
-        assertEquals("Plato con el id 1 no encontrado", exception.getMessage());
+        assertEquals("Plato no encontrado con id: '1'", exception.getMessage());
         verify(dishRepository).findById(1L);
         verify(dishRepository, never()).delete(any());
         verify(dishSubject, never()).notifyObservers(any(), any());
@@ -187,11 +188,11 @@ class DishServiceImplTest {
         DishRequestDTO updateDTO = new DishRequestDTO("Updated Dish", "Updated Description", 15.99f, 1L);
         when(dishRepository.findById(1L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             dishService.update(1L, updateDTO);
         });
 
-        assertEquals("Plato con el id 1 no encontrado", exception.getMessage());
+        assertEquals("Plato no encontrado con id: '1'", exception.getMessage());
         verify(dishRepository).findById(1L);
         verify(menuRepository, never()).findById(anyLong());
         verify(dishRepository, never()).save(any());
@@ -205,11 +206,11 @@ class DishServiceImplTest {
         when(dishRepository.findById(1L)).thenReturn(Optional.of(dish));
         when(menuRepository.findById(2L)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
             dishService.update(1L, updateDTO);
         });
 
-        assertEquals("Menú con el id 2 no encontrado", exception.getMessage());
+        assertEquals("Menú no encontrado con id: '2'", exception.getMessage());
         verify(dishRepository).findById(1L);
         verify(menuRepository).findById(2L);
         verify(dishRepository, never()).save(any());

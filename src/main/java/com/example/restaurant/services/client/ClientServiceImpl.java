@@ -2,6 +2,7 @@ package com.example.restaurant.services.client;
 
 import com.example.restaurant.constants.EventType;
 import com.example.restaurant.dto.client.ClientRequestDTO;
+import com.example.restaurant.exception.ResourceNotFoundException;
 import com.example.restaurant.models.Client;
 import com.example.restaurant.observers.ClientSubject;
 import com.example.restaurant.repositories.IClientRepository;
@@ -61,6 +62,6 @@ public class ClientServiceImpl implements ClientService {
 
     private Client requireClient(Long id) {
         return clientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente con el id " + id + " no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente", "id", id));
     }
 }
