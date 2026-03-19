@@ -2,7 +2,7 @@ package com.nahulemes.restaurantmanagement.controllers;
 
 import com.nahulemes.restaurantmanagement.dto.menu.MenuRequestDTO;
 import com.nahulemes.restaurantmanagement.models.Menu;
-import com.nahulemes.restaurantmanagement.services.menu.MenuService;
+import com.nahulemes.restaurantmanagement.services.interfaces.IMenuService;
 import com.nahulemes.restaurantmanagement.utils.mapper.MenuMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,14 +30,14 @@ import static org.hamcrest.Matchers.*;
 class MenuControllerTest {
 
     private MockMvc mockMvc;
-    private MenuService menuService;
+    private IMenuService menuService;
     private ObjectMapper objectMapper;
 
     private Menu menu;
 
     @BeforeEach
     void setUp() {
-        menuService = mock(MenuService.class);
+        menuService = mock(IMenuService.class);
         objectMapper = new ObjectMapper();
 
         mockMvc = MockMvcBuilders.standaloneSetup(new MenuController(menuService)).build();

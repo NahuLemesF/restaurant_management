@@ -8,6 +8,7 @@ import com.nahulemes.restaurantmanagement.models.Menu;
 import com.nahulemes.restaurantmanagement.observers.DishSubject;
 import com.nahulemes.restaurantmanagement.repositories.IDishRepository;
 import com.nahulemes.restaurantmanagement.repositories.IMenuRepository;
+import com.nahulemes.restaurantmanagement.services.interfaces.IDishService;
 import com.nahulemes.restaurantmanagement.utils.mapper.DishMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class DishServiceImpl implements DishService {
+public class DishServiceImpl implements IDishService {
 
     private final IDishRepository dishRepository;
     private final IMenuRepository menuRepository;
@@ -67,6 +68,10 @@ public class DishServiceImpl implements DishService {
         existingDish.setDescription(dto.description());
         existingDish.setPrice(dto.price());
         existingDish.setMenu(menu);
+        // Preservar imageUrl si el DTO trae una nueva, o mantener la existente
+        if (dto.imageUrl() != null && !dto.imageUrl().isBlank()) {
+            existingDish.setImageUrl(dto.imageUrl());
+        }
 
         Dish updatedDish = dishRepository.save(existingDish);
         dishSubject.notifyObservers(EventType.UPDATE, updatedDish);

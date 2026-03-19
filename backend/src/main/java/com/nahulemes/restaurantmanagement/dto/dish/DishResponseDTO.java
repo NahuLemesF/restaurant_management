@@ -8,6 +8,7 @@ public record DishResponseDTO(
         String description,
         BigDecimal price,
         String dishType,
-        String menuName
+        String menuName,
+        String imageUrl
 ) {
 }

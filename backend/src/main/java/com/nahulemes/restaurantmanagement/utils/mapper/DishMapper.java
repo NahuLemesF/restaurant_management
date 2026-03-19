@@ -16,7 +16,8 @@ public class DishMapper {
                 dish.getDescription(),
                 dish.getPrice().setScale(2, RoundingMode.HALF_UP),
                 dish.getDishType().getName(),
-                dish.getMenu().getName()
+                dish.getMenu().getName(),
+                dish.getImageUrl()
         );
     }
 
@@ -26,6 +27,7 @@ public class DishMapper {
         dish.setDescription(dto.description());
         dish.setPrice(dto.price().setScale(2, RoundingMode.HALF_UP));
         dish.setMenu(menu);
+        dish.setImageUrl(dto.imageUrl());
         return dish;
     }
 

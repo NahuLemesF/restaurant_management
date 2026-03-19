@@ -29,6 +29,7 @@ public class Dish {
     private String name;
     private String description;
     private BigDecimal price;
+    private String imageUrl;
 
     @Enumerated(EnumType.STRING)
     private DishType dishType = DishType.COMMON;

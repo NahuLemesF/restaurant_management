@@ -8,7 +8,7 @@ import com.nahulemes.restaurantmanagement.models.Menu;
 import com.nahulemes.restaurantmanagement.models.Order;
 import com.nahulemes.restaurantmanagement.models.Client;
 import com.nahulemes.restaurantmanagement.models.Dish;
-import com.nahulemes.restaurantmanagement.services.order.OrderService;
+import com.nahulemes.restaurantmanagement.services.interfaces.IOrderService;
 import com.nahulemes.restaurantmanagement.utils.mapper.OrderMapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +36,7 @@ import static org.hamcrest.Matchers.*;
 class OrderControllerTest {
 
     private MockMvc mockMvc;
-    private OrderService orderService;
+    private IOrderService orderService;
     private ObjectMapper objectMapper;
 
     private Order order;
@@ -45,7 +45,7 @@ class OrderControllerTest {
 
     @BeforeEach
     void setUp() {
-        orderService = mock(OrderService.class);
+        orderService = mock(IOrderService.class);
         objectMapper = new ObjectMapper();
 
         mockMvc = MockMvcBuilders.standaloneSetup(new OrderController(orderService)).build();

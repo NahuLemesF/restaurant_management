@@ -9,6 +9,7 @@ import com.nahulemes.restaurantmanagement.observers.MenuSubject;
 import com.nahulemes.restaurantmanagement.repositories.IDishRepository;
 import com.nahulemes.restaurantmanagement.repositories.IMenuRepository;
 import com.nahulemes.restaurantmanagement.utils.mapper.MenuMapper;
+import com.nahulemes.restaurantmanagement.services.interfaces.IMenuService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class MenuServiceImpl implements MenuService {
+public class MenuServiceImpl implements IMenuService {
 
     private final IMenuRepository menuRepository;
     private final IDishRepository dishRepository;

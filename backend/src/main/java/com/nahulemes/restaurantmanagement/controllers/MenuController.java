@@ -3,9 +3,8 @@ package com.nahulemes.restaurantmanagement.controllers;
 import com.nahulemes.restaurantmanagement.dto.menu.MenuRequestDTO;
 import com.nahulemes.restaurantmanagement.dto.menu.MenuResponseDTO;
 import com.nahulemes.restaurantmanagement.models.Menu;
-import com.nahulemes.restaurantmanagement.services.menu.MenuService;
+import com.nahulemes.restaurantmanagement.services.interfaces.IMenuService;
 import com.nahulemes.restaurantmanagement.utils.mapper.MenuMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,10 +23,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/menus")
 public class MenuController {
 
-    private final MenuService menuService;
+    private final IMenuService menuService;
 
-    @Autowired
-    public MenuController(MenuService menuService) {
+    public MenuController(IMenuService menuService) {
         this.menuService = menuService;
     }
 

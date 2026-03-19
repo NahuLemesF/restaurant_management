@@ -5,7 +5,7 @@ import com.nahulemes.restaurantmanagement.dto.dish.DishRequestDTO;
 import com.nahulemes.restaurantmanagement.dto.dish.DishResponseDTO;
 import com.nahulemes.restaurantmanagement.models.Dish;
 import com.nahulemes.restaurantmanagement.models.Menu;
-import com.nahulemes.restaurantmanagement.services.dish.DishService;
+import com.nahulemes.restaurantmanagement.services.interfaces.IDishService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,7 +31,7 @@ import static org.hamcrest.Matchers.*;
 class DishControllerTest {
 
     private MockMvc mockMvc;
-    private DishService dishService;
+    private IDishService dishService;
     private ObjectMapper objectMapper;
 
     private Dish dish;
@@ -39,7 +39,7 @@ class DishControllerTest {
 
     @BeforeEach
     void setUp() {
-        dishService = mock(DishService.class);
+        dishService = mock(IDishService.class);
         objectMapper = new ObjectMapper();
 
         mockMvc = MockMvcBuilders.standaloneSetup(new DishController(dishService)).build();
@@ -53,7 +53,7 @@ class DishControllerTest {
     void addDish() throws Exception {
         when(dishService.create(any(DishRequestDTO.class))).thenReturn(dish);
 
-        DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", new BigDecimal("12.99"), 1L);
+        DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", new BigDecimal("12.99"), 1L, "http://image.jpg");
 
         mockMvc.perform(post("/dishes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -111,7 +111,7 @@ class DishControllerTest {
     void updateDish() throws Exception {
         when(dishService.update(anyLong(), any(DishRequestDTO.class))).thenReturn(dish);
 
-        DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", new BigDecimal("12.99"), 1L);
+        DishRequestDTO dishRequestDTO = new DishRequestDTO("Pasta", "Delicious pasta", new BigDecimal("12.99"), 1L, "http://image.jpg");
 
         mockMvc.perform(put("/dishes/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -147,7 +147,8 @@ class DishControllerTest {
                 "Delicious pasta",
                 new BigDecimal("12.99"),
                 "COMMON",
-                "Lunch Menu"
+                "Lunch Menu",
+                ""
         );
 
         assertEquals(1L, dishResponseDTO.id());

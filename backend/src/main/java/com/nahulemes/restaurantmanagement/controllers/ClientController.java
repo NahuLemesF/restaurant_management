@@ -2,7 +2,7 @@ package com.nahulemes.restaurantmanagement.controllers;
 
 import com.nahulemes.restaurantmanagement.dto.client.ClientRequestDTO;
 import com.nahulemes.restaurantmanagement.dto.client.ClientResponseDTO;
-import com.nahulemes.restaurantmanagement.services.client.ClientService;
+import com.nahulemes.restaurantmanagement.services.interfaces.IClientService;
 import com.nahulemes.restaurantmanagement.utils.mapper.ClientMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClientController {
 
-    private final ClientService clientService;
+    private final IClientService clientService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

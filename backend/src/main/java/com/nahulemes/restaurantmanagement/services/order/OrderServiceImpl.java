@@ -9,8 +9,9 @@ import com.nahulemes.restaurantmanagement.models.Dish;
 import com.nahulemes.restaurantmanagement.models.Order;
 import com.nahulemes.restaurantmanagement.observers.OrderSubject;
 import com.nahulemes.restaurantmanagement.repositories.IOrderRepository;
-import com.nahulemes.restaurantmanagement.services.client.ClientService;
-import com.nahulemes.restaurantmanagement.services.dish.DishService;
+import com.nahulemes.restaurantmanagement.services.interfaces.IClientService;
+import com.nahulemes.restaurantmanagement.services.interfaces.IDishService;
+import com.nahulemes.restaurantmanagement.services.interfaces.IOrderService;
 import com.nahulemes.restaurantmanagement.utils.OrderPriceCalculator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,15 +21,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class OrderServiceImpl implements OrderService {
+public class OrderServiceImpl implements IOrderService {
 
     private final IOrderRepository orderRepository;
     private final OrderSubject orderSubject;
     private final OrderProcessingChain orderProcessingChain;
-    private final ClientService clientService;
-    private final DishService dishService;
+    private final IClientService clientService;
+    private final IDishService dishService;
 
-    public OrderServiceImpl(IOrderRepository orderRepository, OrderSubject orderSubject, OrderProcessingChain orderProcessingChain, ClientService clientService, DishService dishService) {
+    public OrderServiceImpl(IOrderRepository orderRepository, OrderSubject orderSubject, OrderProcessingChain orderProcessingChain, IClientService clientService, IDishService dishService) {
         this.orderRepository = orderRepository;
         this.orderSubject = orderSubject;
         this.orderProcessingChain = orderProcessingChain;

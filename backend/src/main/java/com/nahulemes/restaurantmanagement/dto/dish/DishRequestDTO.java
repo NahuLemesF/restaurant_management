@@ -18,6 +18,8 @@ public record DishRequestDTO(
         BigDecimal price,
 
         @NotNull(message = "El ID del menú es obligatorio")
-        Long menuId
+        Long menuId,
+
+        String imageUrl
 ) {
 }

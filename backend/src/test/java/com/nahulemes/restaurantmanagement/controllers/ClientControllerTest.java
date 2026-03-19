@@ -3,7 +3,7 @@ package com.nahulemes.restaurantmanagement.controllers;
 import com.nahulemes.restaurantmanagement.constants.ClientType;
 import com.nahulemes.restaurantmanagement.dto.client.ClientRequestDTO;
 import com.nahulemes.restaurantmanagement.models.Client;
-import com.nahulemes.restaurantmanagement.services.client.ClientService;
+import com.nahulemes.restaurantmanagement.services.interfaces.IClientService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,14 +28,14 @@ import static org.hamcrest.Matchers.*;
 class ClientControllerTest {
 
     private MockMvc mockMvc;
-    private ClientService clientService;
+    private IClientService clientService;
     private ObjectMapper objectMapper;
 
     private Client client;
 
     @BeforeEach
     void setUp() {
-        clientService = mock(ClientService.class);
+        clientService = mock(IClientService.class);
         objectMapper = new ObjectMapper();
 
         mockMvc = MockMvcBuilders.standaloneSetup(new ClientController(clientService)).build();

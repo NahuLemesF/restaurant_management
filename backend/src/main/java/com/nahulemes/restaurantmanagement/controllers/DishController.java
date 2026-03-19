@@ -3,9 +3,8 @@ package com.nahulemes.restaurantmanagement.controllers;
 import com.nahulemes.restaurantmanagement.dto.dish.DishRequestDTO;
 import com.nahulemes.restaurantmanagement.dto.dish.DishResponseDTO;
 import com.nahulemes.restaurantmanagement.models.Dish;
-import com.nahulemes.restaurantmanagement.services.dish.DishService;
+import com.nahulemes.restaurantmanagement.services.interfaces.IDishService;
 import com.nahulemes.restaurantmanagement.utils.mapper.DishMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
 import jakarta.validation.Valid;
@@ -25,10 +24,9 @@ import java.util.stream.Collectors;
 @RequestMapping("/dishes")
 public class DishController {
 
-    private final DishService dishService;
+    private final IDishService dishService;
 
-    @Autowired
-    public DishController(DishService dishService) {
+    public DishController(IDishService dishService) {
         this.dishService = dishService;
     }
 

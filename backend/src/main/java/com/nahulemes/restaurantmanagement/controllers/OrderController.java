@@ -2,7 +2,7 @@ package com.nahulemes.restaurantmanagement.controllers;
 
 import com.nahulemes.restaurantmanagement.dto.order.OrderRequestDTO;
 import com.nahulemes.restaurantmanagement.dto.order.OrderResponseDTO;
-import com.nahulemes.restaurantmanagement.services.order.OrderService;
+import com.nahulemes.restaurantmanagement.services.interfaces.IOrderService;
 import com.nahulemes.restaurantmanagement.utils.mapper.OrderMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
 
-    private final OrderService orderService;
+    private final IOrderService orderService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -7,13 +7,14 @@ import com.nahulemes.restaurantmanagement.models.Client;
 import com.nahulemes.restaurantmanagement.observers.ClientSubject;
 import com.nahulemes.restaurantmanagement.repositories.IClientRepository;
 import com.nahulemes.restaurantmanagement.utils.mapper.ClientMapper;
+import com.nahulemes.restaurantmanagement.services.interfaces.IClientService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-public class ClientServiceImpl implements ClientService {
+public class ClientServiceImpl implements IClientService {
 
     private final IClientRepository clientRepository;
     private final ClientSubject clientSubject;
