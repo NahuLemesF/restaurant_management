@@ -1,34 +1,51 @@
 import { useState, useEffect } from 'react';
-import { ShoppingBag, Search, Plus, Minus, Trash2, Printer, CreditCard, UtensilsCrossed } from 'lucide-react';
+import { ShoppingBag, Search, Plus, Minus, Trash2, Printer, CreditCard, UtensilsCrossed, User } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { getDishes, getClients, createOrder } from '../lib/api';
 
 export default function PointOfSale() {
-  const [categories, setCategories] = useState(['Todos', 'Principales', 'Entradas', 'Bebidas', 'Postres']);
+  const [categories, setCategories] = useState(['Todos']);
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
-  const [cart, setCart] = useState([]);
   
-  // Mock data
+  const [cart, setCart] = useState([]);
   const [dishes, setDishes] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [selectedClientId, setSelectedClientId] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // Mock load
-    setTimeout(() => {
-      setDishes([
-        { id: 1, name: 'Bife de Chorizo c/ Fritas', price: 12500, category: 'Principales', image: '🥩' },
-        { id: 2, name: 'Milanesa Napolitana', price: 8900, category: 'Principales', image: '🥘' },
-        { id: 3, name: 'Ensalada César', price: 5500, category: 'Entradas', image: '🥗' },
-        { id: 4, name: 'Rabas a la Romana', price: 7200, category: 'Entradas', image: '🦑' },
-        { id: 5, name: 'Vino Tinto Malbec', price: 8000, category: 'Bebidas', image: '🍷' },
-        { id: 6, name: 'Gaseosa Cola 500ml', price: 1500, category: 'Bebidas', image: '🥤' },
-        { id: 7, name: 'Flan Mixto', price: 2500, category: 'Postres', image: '🍮' },
-        { id: 8, name: 'Helado 2 Bochas', price: 3000, category: 'Postres', image: '🍨' },
-      ]);
-    }, 300);
+    loadData();
   }, []);
 
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [dishesRes, clientsRes] = await Promise.all([
+        getDishes(),
+        getClients()
+      ]);
+      setDishes(dishesRes.data);
+      setClients(clientsRes.data);
+
+      // Extract unique menu names to act as categories
+      const menus = [...new Set(dishesRes.data.map(d => d.menuName))];
+      setCategories(['Todos', ...menus]);
+      
+      if (clientsRes.data.length > 0) {
+        setSelectedClientId(clientsRes.data[0].id);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error cargando inicial. Asegúrate que hayas cargado menús, platos y clientes previamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredDishes = dishes.filter(dish => {
-    const matchesCategory = activeCategory === 'Todos' || dish.category === activeCategory;
+    const matchesCategory = activeCategory === 'Todos' || dish.menuName === activeCategory;
     const matchesSearch = dish.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
@@ -55,10 +72,37 @@ export default function PointOfSale() {
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.dish.price * item.quantity), 0);
 
+  const handleCheckout = async () => {
+    if (!selectedClientId) {
+      alert("Debes seleccionar un cliente primero.");
+      return;
+    }
+    
+    // Flat map of dish IDs reflecting quantities
+    const dishIds = [];
+    cart.forEach(item => {
+      for (let i = 0; i < item.quantity; i++) {
+        dishIds.push(item.dish.id);
+      }
+    });
+
+    try {
+      setSaving(true);
+      await createOrder({ clientId: selectedClientId, dishIds });
+      alert('Orden guardada y facturada correctamente.');
+      setCart([]); // Clear cart
+    } catch (err) {
+      console.error(err);
+      alert('Hubo un error al facturar la orden.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="flex h-[calc(100vh-0px)] overflow-hidden bg-background">
       
-      {/* LEFT PANEL: Menu & Dishes (2/3 width) */}
+      {/* LEFT PANEL: Menu & Dishes */}
       <div className="flex-1 flex flex-col h-full border-r border-border bg-background">
         <div className="p-6 border-b border-border bg-card">
           <h1 className="text-2xl font-bold tracking-tight mb-4">Punto de Venta</h1>
@@ -76,7 +120,6 @@ export default function PointOfSale() {
             </div>
           </div>
 
-          {/* Categories */}
           <div className="flex overflow-x-auto gap-2 mt-4 pb-2 snap-x scrollbar-hide">
             {categories.map(cat => (
               <button
@@ -95,41 +138,65 @@ export default function PointOfSale() {
           </div>
         </div>
 
-        {/* Dishes Grid */}
         <div className="flex-1 overflow-y-auto p-6 bg-secondary/20">
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredDishes.map(dish => (
-              <button
-                key={dish.id}
-                onClick={() => addToCart(dish)}
-                className="bg-card border border-border rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 hover:border-primary/50 hover:shadow-md transition-all group active:scale-95"
-              >
-                <div className="w-16 h-16 text-4xl bg-secondary/50 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  {dish.image}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm line-clamp-2 leading-tight">{dish.name}</h3>
-                  <p className="text-primary font-bold mt-1">${dish.price.toLocaleString()}</p>
-                </div>
-              </button>
-            ))}
-          </div>
+          {loading ? (
+             <div className="flex justify-center items-center h-full text-muted-foreground">
+               <span className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></span>
+             </div>
+          ) : filteredDishes.length === 0 ? (
+            <div className="flex flex-col justify-center items-center h-full text-muted-foreground">
+              Aún no hay platos registrados o que coincidan con la búsqueda.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredDishes.map(dish => (
+                <button
+                  key={dish.id}
+                  onClick={() => addToCart(dish)}
+                  className="bg-card border border-border rounded-xl p-4 flex flex-col items-center justify-center text-center gap-3 hover:border-primary/50 hover:shadow-md transition-all group active:scale-95"
+                >
+                  {dish.dishType === 'Popular' && (
+                    <span className="absolute top-2 right-2 bg-amber-500 text-amber-950 text-[10px] font-bold px-2 py-0.5 rounded-full">🔥</span>
+                  )}
+                  <div className="w-16 h-16 text-4xl bg-secondary/50 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                    🍛
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-sm line-clamp-2 leading-tight">{dish.name}</h3>
+                    <p className="text-primary font-bold mt-1">${dish.price?.toLocaleString()}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* RIGHT PANEL: Cart / Ticket (1/3 width) */}
+      {/* RIGHT PANEL: Cart / Ticket */}
       <div className="w-96 flex flex-col h-full bg-card shadow-[-4px_0_24px_-10px_rgba(0,0,0,0.1)] z-10">
         
-        {/* Ticket Header */}
-        <div className="p-6 border-b border-border">
-          <div className="flex items-center gap-3 text-foreground mb-1">
+        <div className="p-6 border-b border-border bg-muted/10">
+          <div className="flex items-center gap-3 text-foreground mb-3">
             <ShoppingBag className="w-5 h-5 text-primary" />
             <h2 className="text-xl font-bold">Orden Actual</h2>
           </div>
-          <p className="text-sm text-muted-foreground">Mesa 4 • Mozo: Admin</p>
+          <div className="flex items-center gap-2 text-sm text-foreground bg-background p-2 pr-3 rounded-lg border border-border relative">
+            <User className="w-4 h-4 text-muted-foreground ml-1" />
+            <select 
+              value={selectedClientId} 
+              onChange={e => setSelectedClientId(e.target.value)}
+              className="w-full bg-transparent focus:outline-none appearance-none font-medium text-sm"
+            >
+              <option value="" disabled>Seleccionar un cliente...</option>
+              {clients.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.name} {c.lastName} {c.clientType === 'FREQUENT' ? '(Frecuente)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Ticket Items */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-muted-foreground opacity-60">
@@ -161,35 +228,34 @@ export default function PointOfSale() {
           )}
         </div>
 
-        {/* Ticket Footer (Totals & Actions) */}
         <div className="p-6 bg-muted/30 border-t border-border mt-auto">
           <div className="space-y-2 mb-4 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span>
               <span>${cartTotal.toLocaleString()}</span>
             </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span>Impuestos (0%)</span>
-              <span>$0</span>
-            </div>
             <div className="flex justify-between text-xl font-bold pt-2 border-t border-border text-foreground">
               <span>Total</span>
               <span className="text-primary">${cartTotal.toLocaleString()}</span>
             </div>
+            {clients.find(c => String(c.id) === String(selectedClientId))?.clientType === 'FREQUENT' && (
+               <p className="text-[11px] text-amber-500 font-medium text-right mt-1">* Se aplicará un descuento al facturar por ser cliente frecuente.</p>
+            )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mt-6">
+          <div className="grid grid-cols-2 gap-3 mt-4">
             <button 
-              disabled={cart.length === 0}
+              disabled={cart.length === 0 || saving}
               className="flex items-center justify-center gap-2 py-3 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Printer className="w-4 h-4" /> Guardar
+              <Printer className="w-4 h-4" /> Comanda
             </button>
             <button 
-              disabled={cart.length === 0}
+              onClick={handleCheckout}
+              disabled={cart.length === 0 || saving}
               className="flex items-center justify-center gap-2 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-bold shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <CreditCard className="w-4 h-4" /> Cobrar
+              <CreditCard className="w-4 h-4" /> {saving ? '...' : 'Cobrar'}
             </button>
           </div>
         </div>
