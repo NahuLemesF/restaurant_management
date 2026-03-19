@@ -1,64 +1,100 @@
 import { useState, useEffect } from 'react';
-import { Plus, Search, MoreVertical, Edit2, Trash2, Utensils, Info } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Utensils, X, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { getMenus, createMenu, createDish } from '../lib/api';
 
 export default function MenusAndDishes() {
   const [menus, setMenus] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Mock initial data
+  // Modals state
+  const [isMenuModalOpen, setIsMenuModalOpen] = useState(false);
+  const [isDishModalOpen, setIsDishModalOpen] = useState(false);
+  
+  const [menuFormData, setMenuFormData] = useState({ name: '', description: '' });
+  const [dishFormData, setDishFormData] = useState({ name: '', description: '', price: '', menuId: '' });
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
-    setTimeout(() => {
-      setMenus([
-        {
-          id: 1,
-          name: 'Menú Ejecutivo',
-          description: 'Almuerzo de Lunes a Viernes',
-          dishes: [
-            { id: 101, name: 'Milanesa c/ Puré', price: 6500, type: 'MAIN_COURSE' },
-            { id: 102, name: 'Flan Casero', price: 2000, type: 'DESSERT' },
-          ]
-        },
-        {
-          id: 2,
-          name: 'Carta Principal',
-          description: 'Platos a la carta disponibles todo el día',
-          dishes: [
-            { id: 201, name: 'Bife de Chorizo', price: 12000, type: 'MAIN_COURSE' },
-            { id: 202, name: 'Ensalada César', price: 5500, type: 'APPETIZER' },
-            { id: 203, name: 'Tiramisú', price: 3500, type: 'DESSERT' },
-            { id: 204, name: 'Vino Tinto Malbec', price: 8000, type: 'BEVERAGE' },
-          ]
-        }
-      ]);
-      setLoading(false);
-    }, 500);
+    loadMenus();
   }, []);
 
+  const loadMenus = async () => {
+    try {
+      setLoading(true);
+      const res = await getMenus();
+      setMenus(res.data);
+    } catch (err) {
+      console.error('Error fetching menus:', err);
+      alert('Error cargando menús.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateMenu = async (e) => {
+    e.preventDefault();
+    try {
+      setSaving(true);
+      await createMenu(menuFormData);
+      setIsMenuModalOpen(false);
+      setMenuFormData({ name: '', description: '' });
+      loadMenus();
+    } catch (err) {
+      console.error(err);
+      alert('Error crear el menú');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCreateDish = async (e) => {
+    e.preventDefault();
+    try {
+      setSaving(true);
+      const data = {
+        ...dishFormData,
+        price: parseFloat(dishFormData.price)
+      };
+      await createDish(data);
+      setIsDishModalOpen(false);
+      setDishFormData({ name: '', description: '', price: '', menuId: '' });
+      loadMenus();
+    } catch (err) {
+      console.error(err);
+      alert('Error al crear el plato');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const getTypeLabel = (type) => {
-    const labels = {
-      APPETIZER: { text: 'ENTRADA', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
-      MAIN_COURSE: { text: 'PRINCIPAL', color: 'bg-primary/10 text-primary border-primary/20' },
-      DESSERT: { text: 'POSTRE', color: 'bg-pink-500/10 text-pink-500 border-pink-500/20' },
-      BEVERAGE: { text: 'BEBIDA', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' }
-    };
-    return labels[type] || { text: type, color: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20' };
+    if (type === 'Popular') {
+      return { text: 'POPULAR 🔥', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' };
+    }
+    return { text: 'REGULAR', color: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20' };
   };
 
   return (
-    <div className="p-8 pb-20 space-y-6 animate-in fade-in duration-500">
+    <div className="p-8 pb-20 space-y-6 animate-in fade-in duration-500 relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Menús & Platos</h1>
           <p className="text-muted-foreground mt-1">Administra las cartas y los platos del restaurante.</p>
         </div>
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2.5 rounded-lg hover:bg-secondary/80 font-medium transition-colors shadow-sm">
+          <button 
+            onClick={() => setIsMenuModalOpen(true)}
+            className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2.5 rounded-lg hover:bg-secondary/80 font-medium transition-colors shadow-sm"
+          >
             <Plus className="w-5 h-5" />
             Nuevo Menú
           </button>
-          <button className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg hover:bg-primary/90 font-medium transition-colors shadow-sm">
+          <button 
+            onClick={() => setIsDishModalOpen(true)}
+            className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 rounded-lg hover:bg-primary/90 font-medium transition-colors shadow-sm"
+          >
             <Utensils className="w-5 h-5" />
             Agregar Plato
           </button>
@@ -94,10 +130,6 @@ export default function MenusAndDishes() {
                   </h2>
                   <p className="text-muted-foreground text-sm mt-1">{menu.description}</p>
                 </div>
-                <div className="flex gap-2">
-                  <button className="text-muted-foreground hover:text-primary transition-colors p-1"><Edit2 className="w-4 h-4" /></button>
-                  <button className="text-muted-foreground hover:text-destructive transition-colors p-1"><Trash2 className="w-4 h-4" /></button>
-                </div>
               </div>
 
               {/* Dishes List */}
@@ -106,36 +138,32 @@ export default function MenusAndDishes() {
                   <thead className="bg-muted/10 text-xs uppercase font-medium text-muted-foreground">
                     <tr>
                       <th className="px-5 py-3 text-left">Plato</th>
+                      <th className="px-5 py-3 text-left hidden sm:table-cell">Desc.</th>
                       <th className="px-5 py-3 text-left">Tipo</th>
                       <th className="px-5 py-3 text-right">Precio</th>
-                      <th className="px-5 py-3 text-right"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {menu.dishes.length === 0 ? (
+                    {!menu.dishes || menu.dishes.length === 0 ? (
                       <tr>
                         <td colSpan="4" className="px-5 py-6 text-center text-muted-foreground text-sm">
-                          Este menú no tiene platos.
+                          Este menú no tiene platos aún.
                         </td>
                       </tr>
                     ) : (
                       menu.dishes.map(dish => {
-                        const typeInfo = getTypeLabel(dish.type);
+                        const typeInfo = getTypeLabel(dish.dishType);
                         return (
                           <tr key={dish.id} className="group hover:bg-muted/30 transition-colors">
                             <td className="px-5 py-3 font-medium">{dish.name}</td>
+                            <td className="px-5 py-3 text-muted-foreground truncate max-w-[150px] hidden sm:table-cell" title={dish.description}>{dish.description}</td>
                             <td className="px-5 py-3">
                               <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider border", typeInfo.color)}>
                                 {typeInfo.text}
                               </span>
                             </td>
                             <td className="px-5 py-3 text-right font-medium text-primary">
-                              ${dish.price.toLocaleString()}
-                            </td>
-                            <td className="px-5 py-3 text-right">
-                              <button className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all">
-                                <Edit2 className="w-3.5 h-3.5" />
-                              </button>
+                              ${dish.price?.toLocaleString()}
                             </td>
                           </tr>
                         );
@@ -146,6 +174,79 @@ export default function MenusAndDishes() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* MODAL NUEVO MENÚ */}
+      {isMenuModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-card w-full max-w-sm rounded-xl border border-border shadow-lg p-6 animate-in zoom-in-95">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold">Nuevo Menú</h3>
+              <button onClick={() => setIsMenuModalOpen(false)} className="text-muted-foreground hover:text-foreground transition">
+                <X className="w-5 h-5"/>
+              </button>
+            </div>
+            <form onSubmit={handleCreateMenu} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Nombre</label>
+                <input required value={menuFormData.name} onChange={e => setMenuFormData({...menuFormData, name: e.target.value})} type="text" className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Descripción</label>
+                <textarea required value={menuFormData.description} onChange={e => setMenuFormData({...menuFormData, description: e.target.value})} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none resize-none" rows="3" />
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsMenuModalOpen(false)} className="px-4 py-2 text-sm font-medium bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80">Cancelar</button>
+                <button type="submit" disabled={saving} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL NUEVO PLATO */}
+      {isDishModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-card w-full max-w-md rounded-xl border border-border shadow-lg p-6 animate-in zoom-in-95">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold">Agregar Plato</h3>
+              <button onClick={() => setIsDishModalOpen(false)} className="text-muted-foreground hover:text-foreground transition">
+                <X className="w-5 h-5"/>
+              </button>
+            </div>
+            <form onSubmit={handleCreateDish} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Menú al que pertenece</label>
+                <select required value={dishFormData.menuId} onChange={e => setDishFormData({...dishFormData, menuId: e.target.value})} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none">
+                  <option value="" disabled>Seleccione un menú</option>
+                  {menus.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Nombre del Plato</label>
+                  <input required value={dishFormData.name} onChange={e => setDishFormData({...dishFormData, name: e.target.value})} type="text" className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Precio ($)</label>
+                  <input required min="1" step="0.01" value={dishFormData.price} onChange={e => setDishFormData({...dishFormData, price: e.target.value})} type="number" className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Descripción</label>
+                <textarea required value={dishFormData.description} onChange={e => setDishFormData({...dishFormData, description: e.target.value})} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none resize-none" rows="2" />
+              </div>
+              <div className="bg-blue-500/10 text-blue-500 p-3 rounded-lg flex gap-3 text-sm border border-blue-500/20">
+                <Info className="w-5 h-5 shrink-0" />
+                <p>El sistema asignará el estado <b>POPULAR</b> automáticamente a medida que el plato reciba más órdenes.</p>
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsDishModalOpen(false)} className="px-4 py-2 text-sm font-medium bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80">Cancelar</button>
+                <button type="submit" disabled={saving || !dishFormData.menuId} className="px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50">Guardar Plato</button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
