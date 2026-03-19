@@ -191,7 +191,7 @@ export default function PointOfSale() {
               <option value="" disabled>Seleccionar un cliente...</option>
               {clients.map(c => (
                 <option key={c.id} value={c.id}>
-                  {c.name} {c.lastName} {c.clientType === 'FREQUENT' ? '(Frecuente)' : ''}
+                  {c.name} {c.lastName} {c.clientType === 'Frecuente' ? '(Frecuente)' : ''}
                 </option>
               ))}
             </select>
@@ -239,7 +239,7 @@ export default function PointOfSale() {
               <span>Total</span>
               <span className="text-primary">${cartTotal.toLocaleString()}</span>
             </div>
-            {clients.find(c => String(c.id) === String(selectedClientId))?.clientType === 'FREQUENT' && (
+            {clients.find(c => String(c.id) === String(selectedClientId))?.clientType === 'Frecuente' && (
                <p className="text-[11px] text-amber-500 font-medium text-right mt-1">* Se aplicará un descuento al facturar por ser cliente frecuente.</p>
             )}
           </div>

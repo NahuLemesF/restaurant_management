@@ -10,7 +10,7 @@ export default function Clients() {
   const [loading, setLoading] = useState(true);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', lastName: '', email: '', clientType: 'COMMON' });
+  const [formData, setFormData] = useState({ name: '', lastName: '', email: '', clientType: 'Comun' });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function Clients() {
       setSaving(true);
       await createClient(formData);
       setIsModalOpen(false);
-      setFormData({ name: '', lastName: '', email: '', clientType: 'COMMON' });
+      setFormData({ name: '', lastName: '', email: '', clientType: 'Comun' });
       showSuccessToast('Cliente registrado');
       loadClients();
     } catch (err) {
@@ -146,11 +146,11 @@ export default function Clients() {
                     <td className="px-6 py-4">
                       <span className={cn(
                         "px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide",
-                        client.clientType === 'FREQUENT' 
+                        client.clientType === 'Frecuente' 
                           ? "bg-amber-500/10 text-amber-500 border border-amber-500/20" 
                           : "bg-zinc-500/10 text-zinc-500 border border-zinc-500/20"
                       )}>
-                        {client.clientType === 'FREQUENT' ? 'FRECUENTE 👑' : 'REGULAR'}
+                        {client.clientType === 'Frecuente' ? 'FRECUENTE 👑' : 'REGULAR'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -193,14 +193,6 @@ export default function Clients() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Email</label>
                 <input required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} type="email" className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none" />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Tipo</label>
-                <select value={formData.clientType} onChange={e => setFormData({...formData, clientType: e.target.value})} className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/50 outline-none">
-                  <option value="COMMON">REGULAR</option>
-                  <option value="FREQUENT">FRECUENTE</option>
-                </select>
               </div>
 
               <div className="pt-4 flex justify-end gap-3">
