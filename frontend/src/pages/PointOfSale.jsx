@@ -79,6 +79,9 @@ export default function PointOfSale() {
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.dish.price * item.quantity), 0);
+  const isFrequent = clients.find(c => String(c.id) === String(selectedClientId))?.clientType === 'Frecuente';
+  const discountAmount = isFrequent ? cartTotal * 0.0238 : 0;
+  const finalTotal = cartTotal - discountAmount;
 
   const handleCheckout = async () => {
     if (!selectedClientId) {
@@ -252,13 +255,20 @@ export default function PointOfSale() {
         {/* Footer: Total & Actions */}
         <div className="p-6 bg-surface-container-lowest shadow-[0_-20px_40px_rgba(0,0,0,0.4)] z-10 border-t border-outline-variant/5">
           <div className="space-y-2 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <span className="font-headline font-black text-lg uppercase tracking-tight text-on-surface">Total</span>
-              <span className="font-headline font-black text-2xl text-primary">${cartTotal.toLocaleString()}</span>
+            <div className="flex justify-between items-center text-sm mb-2">
+              <span className="text-on-surface-variant font-semibold">Subtotal</span>
+              <span className="text-on-surface font-mono">${cartTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
-            {clients.find(c => String(c.id) === String(selectedClientId))?.clientType === 'Frecuente' && (
-              <p className="text-[10px] text-tertiary font-bold tracking-wide uppercase text-right mt-1 w-full">* Descuento aplicado (Frecuente)</p>
+            {isFrequent && (
+              <div className="flex justify-between items-center text-sm mb-2">
+                <span className="text-tertiary shadow-sm font-semibold">VIP Bonus (2.38%)</span>
+                <span className="text-tertiary font-mono">-${discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
             )}
+            <div className="flex justify-between items-center pt-3 border-t border-outline-variant/10">
+              <span className="font-headline font-black text-lg uppercase tracking-tight text-on-surface">Total</span>
+              <span className="font-headline font-black text-2xl text-primary">${finalTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
           </div>
           
           <div className="grid grid-cols-2 gap-3">
@@ -291,7 +301,9 @@ export default function PointOfSale() {
         <ReceiptTemplate 
           ref={receiptRef}
           cart={cart}
-          total={cartTotal}
+          subtotal={cartTotal}
+          discount={discountAmount}
+          total={finalTotal}
           clientName={
             selectedClientId 
               ? `${clients.find(c => String(c.id) === String(selectedClientId))?.name} ${clients.find(c => String(c.id) === String(selectedClientId))?.lastName}` 

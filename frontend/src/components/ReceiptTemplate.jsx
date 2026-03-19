@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 
 // Tamaño estándar de ticket térmico 80mm (approx 300px ancho)
-const ReceiptTemplate = forwardRef(({ cart, total, clientName, orderDate }, ref) => {
+const ReceiptTemplate = forwardRef(({ cart, subtotal, discount, total, clientName, orderDate }, ref) => {
   return (
     <div 
       ref={ref} 
@@ -37,9 +37,22 @@ const ReceiptTemplate = forwardRef(({ cart, total, clientName, orderDate }, ref)
 
         <div className="w-full border-t border-dashed border-black my-4"></div>
 
+        {discount > 0 && (
+          <div className="space-y-1 mb-2">
+            <div className="flex justify-between text-xs">
+              <span>Subtotal</span>
+              <span>${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+            <div className="flex justify-between text-xs font-bold">
+              <span>Descuento VIP (2.38%)</span>
+              <span>-${discount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between text-sm font-bold uppercase">
           <span>Total a Pagar</span>
-          <span>${total.toLocaleString()}</span>
+          <span>${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
 
         <div className="w-full border-t border-dashed border-black my-4"></div>
