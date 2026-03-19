@@ -142,14 +142,14 @@ classDiagram
         Long id
         String name
         String description
-        Float price
+        BigDecimal price
         DishType dishType
     }
 
     class Order {
         Long id
         LocalDateTime orderDate
-        Float totalPrice
+        BigDecimal totalPrice
     }
 
     class Client {

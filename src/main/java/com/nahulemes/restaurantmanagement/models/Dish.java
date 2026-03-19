@@ -13,6 +13,9 @@ import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +29,11 @@ public class Dish {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "El nombre del plato no puede estar vacío")
     private String name;
+    @NotBlank(message = "La descripción no puede estar vacía")
     private String description;
+    @NotNull(message = "El precio no puede ser nulo")
     private BigDecimal price;
 
     @Enumerated(EnumType.STRING)
