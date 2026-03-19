@@ -14,7 +14,7 @@ El proyecto está pensado como backend demostrativo para portfolio, priorizando 
 - **Java 17**
 - **Spring Boot**
 - **Spring Data JPA (Hibernate)**
-- **MySQL**
+- **PostgreSQL**
 - **Gradle**
 - **Swagger / OpenAPI**
 - **Jakarta Validation**
@@ -53,7 +53,7 @@ El proyecto está pensado como backend demostrativo para portfolio, priorizando 
 ### 1. Prerrequisitos
 - **Java 17** o superior.
 - **Gradle**.
-- **MySQL 8.0+**.
+- **PostgreSQL 16+**.
 
 ### 2. Base de Datos (Entorno Local)
 
@@ -69,8 +69,8 @@ _El esquema se genera automáticamente a partir de las entidades JPA._
 ```bash
 SPRING_PROFILES_ACTIVE=dev
 
-DB_URL=jdbc:mysql://localhost:3306/restaurant_management
-DB_USERNAME=root
+DB_URL=jdbc:postgresql://localhost:5432/restaurant_management
+DB_USERNAME=postgres
 DB_PASSWORD=
 
 DDL_AUTO=update
@@ -179,7 +179,7 @@ erDiagram
         VARCHAR name
         VARCHAR last_name
         VARCHAR email
-        ENUM client_type
+        VARCHAR client_type
     }
 
     MENU {
@@ -192,15 +192,15 @@ erDiagram
         BIGINT id PK
         VARCHAR name
         VARCHAR description
-        FLOAT price
-        ENUM dish_type
+        NUMERIC price
+        VARCHAR dish_type
         BIGINT menu_id FK
     }
 
     ORDER {
         BIGINT id PK
-        DATETIME order_date
-        FLOAT total_price
+        TIMESTAMP order_date
+        NUMERIC total_price
         BIGINT client_id FK
     }
 
@@ -236,6 +236,6 @@ Proyecto desarrollado por **Nahuel Lemes**.
 
 ## 📝 Notas
 - El proyecto está pensado para uso **demostrativo / educativo**.
-- En entorno local se utiliza MySQL con usuario `root` sin contraseña.
+- En entorno local se utiliza PostgreSQL con usuario `postgres`.
 - En un entorno productivo real, las credenciales y configuraciones deben ajustarse mediante variables de entorno seguras.
 
