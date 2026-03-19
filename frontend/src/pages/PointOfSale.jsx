@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
+import ReceiptTemplate from '../components/ReceiptTemplate';
 import { cn } from '../lib/utils';
 import { getDishes, getClients, createOrder } from '../lib/api';
 import { showSuccessToast, showErrorToast, showErrorModal } from '../lib/alerts';
@@ -14,6 +16,13 @@ export default function PointOfSale() {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const receiptRef = useRef();
+  
+  const handlePrint = useReactToPrint({
+    contentRef: receiptRef,
+    documentTitle: `Ticket_${new Date().getTime()}`,
+  });
 
   useEffect(() => {
     loadData();
@@ -254,6 +263,7 @@ export default function PointOfSale() {
           
           <div className="grid grid-cols-2 gap-3">
             <button 
+              onClick={() => handlePrint()}
               disabled={cart.length === 0 || saving}
               className="py-4 rounded-sm border border-outline-variant/20 text-xs text-on-surface font-bold uppercase tracking-widest hover:bg-surface-container-high transition-all disabled:opacity-30"
             >
@@ -275,6 +285,21 @@ export default function PointOfSale() {
         </div>
 
       </section>
+
+      {/* COMPONENTE OCULTO PARA IMPRESIÓN */}
+      <div style={{ display: 'none' }}>
+        <ReceiptTemplate 
+          ref={receiptRef}
+          cart={cart}
+          total={cartTotal}
+          clientName={
+            selectedClientId 
+              ? `${clients.find(c => String(c.id) === String(selectedClientId))?.name} ${clients.find(c => String(c.id) === String(selectedClientId))?.lastName}` 
+              : 'Consumidor Final'
+          }
+        />
+      </div>
+
     </div>
   );
 }
