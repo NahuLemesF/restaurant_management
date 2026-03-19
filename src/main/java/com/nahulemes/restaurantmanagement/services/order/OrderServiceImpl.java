@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+
 import java.util.List;
 
 @Service
@@ -45,7 +45,6 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order();
         order.setClient(client);
         order.setDishes(dishes);
-        order.setOrderDate(LocalDateTime.now());
 
         recalculateAndProcess(order);
 
