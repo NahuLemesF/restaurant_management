@@ -1,21 +1,29 @@
-import { useState, useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import ReceiptTemplate from '../components/ReceiptTemplate';
 import { cn } from '../lib/utils';
-import { getDishes, getClients, createOrder } from '../lib/api';
-import { showSuccessToast, showErrorToast, showErrorModal } from '../lib/alerts';
+import { useCart } from '../application/useCart';
 
 export default function PointOfSale() {
-  const [categories, setCategories] = useState(['Todos']);
-  const [activeCategory, setActiveCategory] = useState('Todos');
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  const [cart, setCart] = useState([]);
-  const [dishes, setDishes] = useState([]);
-  const [clients, setClients] = useState([]);
-  const [selectedClientId, setSelectedClientId] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const {
+    clients,
+    cart,
+    filteredDishes,
+    categories,
+    selectedClientId, setSelectedClientId,
+    selectedClient,
+    clientIsFrecuente,
+    searchTerm, setSearchTerm,
+    activeCategory, setActiveCategory,
+    subtotal,
+    discount,
+    total,
+    loading,
+    saving,
+    handleAddToCart,
+    handleRemoveFromCart,
+    handleCheckout,
+  } = useCart();
 
   const receiptRef = useRef();
   
@@ -24,96 +32,20 @@ export default function PointOfSale() {
     documentTitle: `Ticket_${new Date().getTime()}`,
   });
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [dishesRes, clientsRes] = await Promise.all([
-        getDishes(),
-        getClients()
-      ]);
-      setDishes(dishesRes.data);
-      setClients(clientsRes.data);
-
-      const menus = [...new Set(dishesRes.data.map(d => d.menuName))];
-      setCategories(['Todos', ...menus]);
-      
-      if (clientsRes.data.length > 0) {
-        setSelectedClientId(clientsRes.data[0].id);
-      }
-    } catch (err) {
-      console.error(err);
-      showErrorModal('Faltan datos iniciales', 'Asegúrate de haber cargado menús, platos y clientes.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredDishes = dishes.filter(dish => {
-    const matchesCategory = activeCategory === 'Todos' || dish.menuName === activeCategory;
-    const matchesSearch = dish.name.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
-  const addToCart = (dish) => {
-    setCart(prev => {
-      const existing = prev.find(item => item.dish.id === dish.id);
-      if (existing) {
-        return prev.map(item => item.dish.id === dish.id ? { ...item, quantity: item.quantity + 1 } : item);
-      }
-      return [...prev, { dish, quantity: 1, notes: '' }];
-    });
-  };
-
-  const updateQuantity = (dishId, delta) => {
-    setCart(prev => prev.map(item => {
-      if (item.dish.id === dishId) {
-        const newQuantity = Math.max(0, item.quantity + delta);
-        return { ...item, quantity: newQuantity };
-      }
-      return item;
-    }).filter(item => item.quantity > 0));
-  };
-
-  const cartTotal = cart.reduce((sum, item) => sum + (item.dish.price * item.quantity), 0);
-  const isFrequent = clients.find(c => String(c.id) === String(selectedClientId))?.clientType === 'Frecuente';
-  const discountAmount = isFrequent ? cartTotal * 0.0238 : 0;
-  const finalTotal = cartTotal - discountAmount;
-
-  const handleCheckout = async () => {
-    if (!selectedClientId) {
-      showErrorToast("Debes seleccionar un cliente primero.");
-      return;
-    }
-    
-    const dishIds = [];
-    cart.forEach(item => {
-      for (let i = 0; i < item.quantity; i++) {
-        dishIds.push(item.dish.id);
-      }
-    });
-
-    try {
-      setSaving(true);
-      await createOrder({ clientId: selectedClientId, dishIds });
-      showSuccessToast('Orden guardada y facturada correctamente.');
-      setCart([]);
-    } catch (err) {
-      console.error(err);
-      showErrorToast('Hubo un error al facturar la orden.');
-    } finally {
-      setSaving(false);
-    }
-  };
+  // Compatibilidad con ReceiptTemplate (espera formato { dish, quantity })
+  const receiptCart = cart.map(item => ({ dish: item, quantity: item.quantity || 1 }));
+  const isFrequent = clientIsFrecuente;
+  const cartTotal = subtotal;
+  const discountAmount = discount;
+  const finalTotal = total;
 
   return (
-    <div className="flex w-full h-full bg-surface">
-      
-      {/* LEFT PANEL: Menu & Dishes */}
-      <section className="w-[70%] h-full flex flex-col p-8 overflow-y-auto hide-scrollbar bg-surface border-r border-outline-variant/10">
+
+    <div className="flex flex-row w-full h-[calc(100vh-5rem)] overflow-hidden">
+      {/* SECCIÓN GRID DE PLATOS */}
+      <section className="w-[70%] h-full flex flex-col overflow-y-auto hide-scrollbar bg-surface">
+        {/* Cabecera, filtros, buscador */}
+        <div className="p-8 pb-4 sticky top-0 bg-surface/90 backdrop-blur z-10 transition-all">
         
         {/* Category Filter Bar */}
         <div className="flex flex-wrap items-center gap-4 mb-8">
@@ -145,6 +77,7 @@ export default function PointOfSale() {
             ))}
           </div>
         </div>
+        </div>
 
         {/* Dishes Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
@@ -160,12 +93,17 @@ export default function PointOfSale() {
             filteredDishes.map(dish => (
               <div
                 key={dish.id}
-                onClick={() => addToCart(dish)}
+                onClick={() => handleAddToCart(dish)}
                 className="group relative bg-surface-container-high p-4 rounded-md transition-all hover:translate-y-[-4px] cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-headline font-semibold text-lg leading-tight text-on-surface pr-2">{dish.name}</h3>
-                  <span className="text-primary font-headline font-bold shrink-0">${dish.price?.toLocaleString()}</span>
+                  {dish.imageUrl && (
+                    <img src={dish.imageUrl} alt={dish.name} className="w-12 h-12 rounded-sm object-cover shrink-0 shadow-sm border border-outline-variant/10" />
+                  )}
+                  {!dish.imageUrl && (
+                    <span className="text-primary font-headline font-bold shrink-0">${dish.price?.toLocaleString()}</span>
+                  )}
                 </div>
                 
                 <p className="text-xs text-on-surface-variant line-clamp-2 font-body leading-relaxed mb-4">
@@ -173,7 +111,8 @@ export default function PointOfSale() {
                 </p>
                 
                 <div className="flex justify-between items-center mt-auto">
-                  <div className="flex gap-1">
+                  <div className="flex gap-2 items-center">
+                    {dish.imageUrl && <span className="text-primary font-headline font-bold">${dish.price?.toLocaleString()}</span>}
                     {dish.dishType === 'Popular' && (
                        <span className="px-2 py-0.5 bg-error-container/20 text-error text-[10px] rounded-sm font-bold uppercase tracking-tighter">
                          Popular 🔥
@@ -218,31 +157,31 @@ export default function PointOfSale() {
         {/* Ticket Items List */}
         <div className="flex-grow overflow-y-auto px-6 hide-scrollbar flex flex-col gap-6 py-4">
           {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-outline opacity-60">
+            <div className="flex-1 flex flex-col items-center justify-center text-on-surface-variant opacity-60 m-8 border border-dashed border-outline-variant/20 rounded-md">
               <span className="material-symbols-outlined text-4xl mb-4">receipt_long</span>
               <p className="text-sm font-body">La comanda está vacía</p>
             </div>
           ) : (
             cart.map(item => (
-              <div key={item.dish.id} className="flex gap-4 relative pl-3 group">
+              <div key={item.id} className="flex gap-4 relative pl-3 group">
                 <div className="absolute left-0 top-0 w-[2px] h-full bg-primary/70 shadow-[0_0_8px_rgba(245,158,11,0.4)]"></div>
                 <div className="flex-grow">
                   <div className="flex justify-between items-start">
-                    <h4 className="text-sm font-semibold text-on-surface leading-tight pr-2">{item.dish.name}</h4>
-                    <span className="text-sm font-mono text-on-surface">${(item.dish.price * item.quantity).toLocaleString()}</span>
+                    <h4 className="text-sm font-semibold text-on-surface leading-tight pr-2">{item.name}</h4>
+                    <span className="text-sm font-mono text-on-surface">${(item.price * (item.quantity || 1)).toLocaleString()}</span>
                   </div>
                   
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center bg-surface-container-high rounded-sm px-1 shadow-sm border border-outline-variant/10">
-                      <button onClick={() => updateQuantity(item.dish.id, -1)} className="p-1 text-on-surface-variant hover:text-primary transition-colors">
+                      <button onClick={() => handleRemoveFromCart(item.id)} className="p-1 text-on-surface-variant hover:text-primary transition-colors">
                         <span className="material-symbols-outlined text-sm leading-none">remove</span>
                       </button>
-                      <span className="px-3 text-xs font-mono font-bold text-on-surface">{item.quantity}</span>
-                      <button onClick={() => updateQuantity(item.dish.id, 1)} className="p-1 text-on-surface-variant hover:text-primary transition-colors">
+                      <span className="px-3 text-xs font-mono font-bold text-on-surface">{item.quantity || 1}</span>
+                      <button onClick={() => handleAddToCart(item)} className="p-1 text-on-surface-variant hover:text-primary transition-colors">
                         <span className="material-symbols-outlined text-sm leading-none">add</span>
                       </button>
                     </div>
-                    <button onClick={() => updateQuantity(item.dish.id, -item.quantity)} className="text-error/60 hover:text-error transition-colors focus:outline-none">
+                    <button onClick={() => handleRemoveFromCart(item.id)} className="text-error/60 hover:text-error transition-colors focus:outline-none">
                       <span className="material-symbols-outlined text-sm">delete</span>
                     </button>
                   </div>
@@ -251,6 +190,7 @@ export default function PointOfSale() {
             ))
           )}
         </div>
+
 
         {/* Footer: Total & Actions */}
         <div className="p-6 bg-surface-container-lowest shadow-[0_-20px_40px_rgba(0,0,0,0.4)] z-10 border-t border-outline-variant/5">
@@ -261,7 +201,7 @@ export default function PointOfSale() {
             </div>
             {isFrequent && (
               <div className="flex justify-between items-center text-sm mb-2">
-                <span className="text-tertiary shadow-sm font-semibold">VIP Bonus (2.38%)</span>
+                <span className="text-tertiary shadow-sm font-semibold">Descuento Frecuente (2.38%)</span>
                 <span className="text-tertiary font-mono">-${discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             )}
@@ -290,7 +230,7 @@ export default function PointOfSale() {
           
           <div className="mt-4 flex items-center justify-center gap-2">
              <div className="w-1.5 h-1.5 rounded-full bg-tertiary shadow-[0_0_8px_#8fd5ff]"></div>
-             <span className="text-[10px] uppercase font-bold text-on-surface-variant tracking-tighter">Kitchen: Ready to Receive</span>
+             <span className="text-[10px] uppercase font-bold text-on-surface-variant tracking-tighter">Cocina: Lista para Recibir</span>
           </div>
         </div>
 

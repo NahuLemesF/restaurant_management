@@ -26,13 +26,19 @@ const ReceiptTemplate = forwardRef(({ cart, subtotal, discount, total, clientNam
         </div>
 
         <div className="space-y-2 text-xs">
-          {cart.map((item, i) => (
-            <div key={i} className="flex justify-between items-start">
-              <span className="w-8 font-bold">{item.quantity}</span>
-              <span className="flex-1 pr-2 uppercase leading-tight">{item.dish.name}</span>
-              <span className="text-right">${(item.dish.price * item.quantity).toLocaleString()}</span>
-            </div>
-          ))}
+          {cart.map((item, i) => {
+            // Soporte para formato plano {id, name, price, quantity} del hook
+            const name = item.name || item.dish?.name || '';
+            const price = item.price ?? item.dish?.price ?? 0;
+            const qty = item.quantity || 1;
+            return (
+              <div key={i} className="flex justify-between items-start">
+                <span className="w-8 font-bold">{qty}</span>
+                <span className="flex-1 pr-2 uppercase leading-tight">{name}</span>
+                <span className="text-right">${(price * qty).toLocaleString()}</span>
+              </div>
+            );
+          })}
         </div>
 
         <div className="w-full border-t border-dashed border-black my-4"></div>
@@ -44,7 +50,7 @@ const ReceiptTemplate = forwardRef(({ cart, subtotal, discount, total, clientNam
               <span>${subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
             <div className="flex justify-between text-xs font-bold">
-              <span>Descuento VIP (2.38%)</span>
+              <span>Descuento Frecuente (2.38%)</span>
               <span>-${discount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
             </div>
           </div>
