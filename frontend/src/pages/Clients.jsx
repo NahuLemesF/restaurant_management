@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, Trash2, Mail, Hash, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { getClients, createClient, deleteClient } from '../lib/api';
+import { showSuccessToast, showErrorToast, showConfirmDialog } from '../lib/alerts';
 
 export default function Clients() {
   const [clients, setClients] = useState([]);
@@ -23,7 +24,7 @@ export default function Clients() {
       setClients(res.data);
     } catch (err) {
       console.error('Error fetching clients:', err);
-      alert('Error cargando clientes revisa la conexión al backend.');
+      showErrorToast('Error cargando clientes');
     } finally {
       setLoading(false);
     }
@@ -36,23 +37,26 @@ export default function Clients() {
       await createClient(formData);
       setIsModalOpen(false);
       setFormData({ name: '', lastName: '', email: '', clientType: 'COMMON' });
+      showSuccessToast('Cliente registrado');
       loadClients();
     } catch (err) {
       console.error(err);
-      alert('Error al crear el cliente.');
+      showErrorToast('Error al crear el cliente');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if(!window.confirm('¿Seguro quieres eliminar este cliente?')) return;
+    const confirmed = await showConfirmDialog('¿Eliminar cliente?');
+    if(!confirmed) return;
     try {
       await deleteClient(id);
+      showSuccessToast('Cliente eliminado');
       loadClients();
     } catch (err) {
       console.error(err);
-      alert('Error al eliminar.');
+      showErrorToast('Error al eliminar');
     }
   };
 

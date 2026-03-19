@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, Utensils, X, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { getMenus, createMenu, createDish } from '../lib/api';
+import { showSuccessToast, showErrorToast } from '../lib/alerts';
 
 export default function MenusAndDishes() {
   const [menus, setMenus] = useState([]);
@@ -27,7 +28,7 @@ export default function MenusAndDishes() {
       setMenus(res.data);
     } catch (err) {
       console.error('Error fetching menus:', err);
-      alert('Error cargando menús.');
+      showErrorToast('Error cargando menús');
     } finally {
       setLoading(false);
     }
@@ -40,10 +41,11 @@ export default function MenusAndDishes() {
       await createMenu(menuFormData);
       setIsMenuModalOpen(false);
       setMenuFormData({ name: '', description: '' });
+      showSuccessToast('Menú creado correctamente');
       loadMenus();
     } catch (err) {
       console.error(err);
-      alert('Error crear el menú');
+      showErrorToast('Error al crear el menú');
     } finally {
       setSaving(false);
     }
@@ -60,10 +62,11 @@ export default function MenusAndDishes() {
       await createDish(data);
       setIsDishModalOpen(false);
       setDishFormData({ name: '', description: '', price: '', menuId: '' });
+      showSuccessToast('Plato agregado');
       loadMenus();
     } catch (err) {
       console.error(err);
-      alert('Error al crear el plato');
+      showErrorToast('Error al crear el plato');
     } finally {
       setSaving(false);
     }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ShoppingBag, Search, Plus, Minus, Trash2, Printer, CreditCard, UtensilsCrossed, User } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { getDishes, getClients, createOrder } from '../lib/api';
+import { showSuccessToast, showErrorToast, showErrorModal } from '../lib/alerts';
 
 export default function PointOfSale() {
   const [categories, setCategories] = useState(['Todos']);
@@ -38,7 +39,7 @@ export default function PointOfSale() {
       }
     } catch (err) {
       console.error(err);
-      alert('Error cargando inicial. Asegúrate que hayas cargado menús, platos y clientes previamente.');
+      showErrorModal('Faltan datos iniciales', 'Error lógico. Asegúrate de haber cargado menús, platos y clientes previamente.');
     } finally {
       setLoading(false);
     }
@@ -74,7 +75,7 @@ export default function PointOfSale() {
 
   const handleCheckout = async () => {
     if (!selectedClientId) {
-      alert("Debes seleccionar un cliente primero.");
+      showErrorToast("Debes seleccionar un cliente primero.");
       return;
     }
     
@@ -89,11 +90,11 @@ export default function PointOfSale() {
     try {
       setSaving(true);
       await createOrder({ clientId: selectedClientId, dishIds });
-      alert('Orden guardada y facturada correctamente.');
+      showSuccessToast('Orden guardada y facturada correctamente.');
       setCart([]); // Clear cart
     } catch (err) {
       console.error(err);
-      alert('Hubo un error al facturar la orden.');
+      showErrorToast('Hubo un error al facturar la orden.');
     } finally {
       setSaving(false);
     }
